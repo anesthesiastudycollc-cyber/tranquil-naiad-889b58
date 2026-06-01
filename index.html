@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anesthesia Study Co. LLC</title>
+  <meta name="description" content="Educational anesthesia tools, study guides, cram sheets, and interactive anesthesia planning workbook by Anesthesia Study Co. LLC.">
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.16);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.76);
+      --cyan: #00c2ff;
+      --purple: #6a11cb;
+      --yellow: #ffd84d;
+      --radius: 20px;
+      --max: 1080px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0,194,255,0.35), transparent 35%),
+        radial-gradient(circle at top right, rgba(106,17,203,0.35), transparent 35%),
+        linear-gradient(135deg, #07111f, #120626 65%, #081827);
+      line-height: 1.6;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(7, 17, 31, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav {
+      max-width: var(--max);
+      margin: auto;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--yellow));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 30px;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .brand small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .navlinks a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 12px;
+      font-size: 14px;
+    }
+
+    .navlinks a:hover {
+      color: white;
+    }
+
+    main {
+      max-width: var(--max);
+      margin: auto;
+      padding: 36px 20px 70px;
+    }
+
+    .hero {
+      padding: 38px 0 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 22px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 32px;
+      line-height: 1.15;
+    }
+
+    h3 {
+      margin-bottom: 6px;
+    }
+
+    p {
+      color: var(--muted);
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 13px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid var(--border);
+      color: white;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #06101f;
+      border: none;
+    }
+
+    .btn.soon {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 850px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .navlinks a {
+        margin-left: 0;
+        margin-right: 10px;
+      }
+    }
+
+    ul {
+      color: var(--muted);
+      padding-left: 20px;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer a {
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <nav>
+    <div class="brand">
+      <div class="logo">A</div>
+      <div>
+        <h1>Anesthesia Study Co. LLC</h1>
+        <small>Educational anesthesia tools</small>
+      </div>
+    </div>
+
+    <div class="navlinks">
+      <a href="#app">App</a>
+      <a href="#products">Products</a>
+      <a href="#social">Social</a>
+      <a href="#support">Support</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero card">
+    <h2>Interactive anesthesia planning tools for students and educators</h2>
+    <p>
+      Anesthesia Study Co. LLC creates educational anesthesia study guides, clinical reasoning tools,
+      simulation resources, cram sheets, and interactive planning workbooks.
+    </p>
+    <p>
+      <strong>Educational only:</strong> This app and website are for educational purposes only
+      and are not medical advice.
+    </p>
+
+    <div class="buttons">
+      <a class="btn primary" href="#app">Learn About the App</a>
+      <a class="btn" href="https://www.etsy.com/shop/AnesthesiaStudyCo?ref=seller-platform-mcnav" target="_blank" rel="noopener">Shop Etsy</a>
+      <a class="btn" href="https://anesthesia-study-co-llc.myshopify.com" target="_blank" rel="noopener">Shop Shopify</a>
+      <a class="btn" href="https://www.amazon.com/Anesthesia-Study-Co-LLC/e/B0H2BKYFVV?ref=sr_ntt_srch_lnk_1&qid=1780266621&sr=1-1" target="_blank" rel="noopener">Shop Amazon</a>
+    </div>
+  </section>
+
+  <section id="app" class="card">
+    <h2>Interactive Anesthesia Planning Workbook App</h2>
+    <p>
+      The interactive anesthesia planning workbook is designed to support structured case planning,
+      simulation preparation, medication decision-making, and clinical reasoning for anesthesia learners.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Student Planning</h3>
+        <p>Organized prompts for preoperative review, induction, maintenance, emergence, and crisis planning.</p>
+      </div>
+
+      <div class="card">
+        <h3>Simulation Support</h3>
+        <p>Designed for beginner anesthesia learners practicing case-based decision-making and crisis responses.</p>
+      </div>
+
+      <div class="card">
+        <h3>Mobile App Ready</h3>
+        <p>Built from HTML/code and prepared for iOS and Android app distribution workflows.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="products" class="card">
+    <h2>Products</h2>
+    <p>
+      Digital anesthesia study resources are available through Etsy, Shopify, and Amazon.
+    </p>
+
+    <div class="buttons">
+      <a class="btn primary" href="https://www.etsy.com/shop/AnesthesiaStudyCo?ref=seller-platform-mcnav" target="_blank" rel="noopener">Visit Etsy Shop</a>
+      <a class="btn" href="https://anesthesia-study-co-llc.myshopify.com" target="_blank" rel="noopener">Visit Shopify Store</a>
+      <a class="btn" href="https://www.amazon.com/Anesthesia-Study-Co-LLC/e/B0H2BKYFVV?ref=sr_ntt_srch_lnk_1&qid=1780266621&sr=1-1" target="_blank" rel="noopener">Shop on Amazon</a>
+      <a class="btn" href="https://a.co/d/0egC34jE" target="_blank" rel="noopener">Amazon Book 1</a>
+      <a class="btn" href="https://a.co/d/00II0fN8" target="_blank" rel="noopener">Amazon Book 2</a>
+      <a class="btn" href="https://a.co/d/0gw1aBau" target="_blank" rel="noopener">Amazon Book 3</a>
+      <a class="btn" href="https://www.amazon.com/dp/B0H3GHQCT9" target="_blank" rel="noopener">Amazon Book 4</a>
+      <a class="btn" href="https://www.amazon.com/Anesthesiologist-Assistant-Get-Jump-Start-ebook/dp/B0H3FJ1TDW" target="_blank" rel="noopener">Amazon Book 5</a>
+    </div>
+  </section>
+
+  <section id="social" class="card">
+    <h2>Connect With Us</h2>
+    <p>Follow Anesthesia Study Co. LLC for anesthesia study resources, new product updates, and learner tools.</p>
+
+    <div class="buttons">
+      <a class="btn" href="https://www.instagram.com/anesthesiastudyco/" target="_blank" rel="noopener">Instagram</a>
+      <span class="btn soon">Facebook Coming Soon</span>
+      <span class="btn soon">TikTok Coming Soon</span>
+      <span class="btn soon">Pinterest Coming Soon</span>
+    </div>
+  </section>
+
+  <section id="about" class="card">
+    <h2>About Anesthesia Study Co. LLC</h2>
+    <p>
+      Anesthesia Study Co. LLC focuses on anesthesia education through visual study tools, digital downloads,
+      interactive workbooks, and mobile-friendly learning resources.
+    </p>
+    <ul>
+      <li>Educational anesthesia study guides</li>
+      <li>Cram sheets and clinical quick references</li>
+      <li>Interactive anesthesia planning workbook</li>
+      <li>Simulation and board-preparation resources</li>
+    </ul>
+  </section>
+
+  <section id="support" class="card">
+    <h2>Support</h2>
+    <p>
+      For app support, order questions, or business inquiries, email:
+      <a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a>
+    </p>
+    <p>
+      Apple Support URL:
+      <a href="https://anesthesiastudyco.com/#support">https://anesthesiastudyco.com/#support</a>
+    </p>
+  </section>
+
+  <footer>
+    <div>© <span id="year"></span> Anesthesia Study Co. LLC. All rights reserved.</div>
+    <div>
+      <a href="privacy.html">Privacy Policy</a> ·
+      <a href="mailto:admin@anesthesiastudyco.com">Support</a>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
