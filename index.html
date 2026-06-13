@@ -166,8 +166,74 @@
       gap: 16px;
     }
 
+    .store-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .product {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 0;
+    }
+
+    .badge {
+      align-self: flex-start;
+      display: inline-block;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      color: #06101f;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+    }
+
+    .badge.download {
+      background: linear-gradient(135deg, var(--yellow), var(--cyan));
+    }
+
+    .product ul {
+      margin: 8px 0 0;
+      font-size: 14px;
+    }
+
+    .product .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .price {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .price-note {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .product .buttons {
+      margin-top: 14px;
+    }
+
+    .product .buttons .btn {
+      flex: 1;
+      text-align: center;
+    }
+
     @media (max-width: 850px) {
       .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .store-grid {
         grid-template-columns: 1fr;
       }
 
@@ -213,6 +279,7 @@
 
     <div class="navlinks">
       <a href="#app">App</a>
+      <a href="#store">Store</a>
       <a href="#products">Products</a>
       <a href="#social">Social</a>
       <a href="#support">Support</a>
@@ -235,7 +302,8 @@
     </p>
 
     <div class="buttons">
-      <a class="btn primary" href="#app">Learn About the App</a>
+      <a class="btn primary" href="#store">Shop the Store</a>
+      <a class="btn" href="#app">Learn About the App</a>
       <a class="btn" href="https://www.etsy.com/shop/AnesthesiaStudyCo?ref=seller-platform-mcnav" target="_blank" rel="noopener">Shop Etsy</a>
       <a class="btn" href="https://anesthesia-study-co-llc.myshopify.com" target="_blank" rel="noopener">Shop Shopify</a>
       <a class="btn" href="https://www.amazon.com/Anesthesia-Study-Co-LLC/e/B0H2BKYFVV?ref=sr_ntt_srch_lnk_1&qid=1780266621&sr=1-1" target="_blank" rel="noopener">Shop Amazon</a>
@@ -267,10 +335,112 @@
     </div>
   </section>
 
-  <section id="products" class="card">
-    <h2>Products</h2>
+  <section id="store" class="card">
+    <h2>Store</h2>
     <p>
-      Digital anesthesia study resources are available through Etsy, Shopify, and Amazon.
+      Buy the interactive anesthesia planning app and digital study sheets directly. Each product opens a
+      secure checkout on our trusted marketplace partner, where your purchase and download are delivered.
+    </p>
+
+    <div class="store-grid">
+
+      <div class="card product">
+        <span class="badge">Interactive App</span>
+        <h3>Interactive Anesthesia Planning Workbook</h3>
+        <p>
+          A guided, tappable workbook for structured case planning, simulation prep, medication
+          decision-making, and clinical reasoning — built for anesthesia learners.
+        </p>
+        <ul>
+          <li>Preop, induction, maintenance, emergence &amp; crisis prompts</li>
+          <li>Case-based, interactive decision practice</li>
+          <li>Mobile-friendly, study anywhere</li>
+        </ul>
+        <div class="price-row">
+          <span class="price">$19.99</span>
+          <span class="price-note">one-time · instant access</span>
+        </div>
+        <div class="buttons">
+          <a class="btn primary" href="https://anesthesia-study-co-llc.myshopify.com" target="_blank" rel="noopener">Buy the App</a>
+        </div>
+      </div>
+
+      <div class="card product">
+        <span class="badge download">Digital Download</span>
+        <h3>Anesthesia Cram Sheets</h3>
+        <p>
+          High-yield, printable cram sheets and clinical quick references covering core anesthesia
+          concepts — perfect for board prep and clinical days.
+        </p>
+        <ul>
+          <li>Printable PDF study sheets</li>
+          <li>Quick-reference drug &amp; dosing tables</li>
+          <li>Board and exam preparation</li>
+        </ul>
+        <div class="price-row">
+          <span class="price">$9.99</span>
+          <span class="price-note">digital download</span>
+        </div>
+        <div class="buttons">
+          <a class="btn primary" href="https://www.etsy.com/shop/AnesthesiaStudyCo?ref=seller-platform-mcnav" target="_blank" rel="noopener">Buy on Etsy</a>
+        </div>
+      </div>
+
+      <div class="card product">
+        <span class="badge download">Study Bundle</span>
+        <h3>Clinical Quick-Reference Bundle</h3>
+        <p>
+          A bundled set of study guides and quick-reference sheets for simulation preparation and
+          day-to-day clinical reasoning practice.
+        </p>
+        <ul>
+          <li>Multiple study guides in one bundle</li>
+          <li>Simulation &amp; clinical reasoning focus</li>
+          <li>Best value for a complete study set</li>
+        </ul>
+        <div class="price-row">
+          <span class="price">$24.99</span>
+          <span class="price-note">bundle · best value</span>
+        </div>
+        <div class="buttons">
+          <a class="btn primary" href="https://www.etsy.com/shop/AnesthesiaStudyCo?ref=seller-platform-mcnav" target="_blank" rel="noopener">Buy the Bundle</a>
+        </div>
+      </div>
+
+      <div class="card product">
+        <span class="badge download">Books</span>
+        <h3>Study Guides &amp; Books</h3>
+        <p>
+          Published anesthesia study guides and exam-prep titles for learners and aspiring
+          anesthesiologist assistants.
+        </p>
+        <ul>
+          <li>Print and Kindle editions</li>
+          <li>Jump-start and board-prep guides</li>
+          <li>Delivered through Amazon</li>
+        </ul>
+        <div class="price-row">
+          <span class="price-note">See current pricing on Amazon</span>
+        </div>
+        <div class="buttons">
+          <a class="btn primary" href="https://www.amazon.com/Anesthesia-Study-Co-LLC/e/B0H2BKYFVV?ref=sr_ntt_srch_lnk_1&qid=1780266621&sr=1-1" target="_blank" rel="noopener">Shop the Books</a>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="margin-top:18px; font-size:13px;">
+      Questions before you buy? Email
+      <a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a>.
+      All products are for educational purposes only and are not medical advice.
+    </p>
+  </section>
+
+  <section id="products" class="card">
+    <h2>More Places to Shop</h2>
+    <p>
+      Prefer a marketplace you already use? The full catalog of digital anesthesia study resources is also
+      available through Etsy, Shopify, and Amazon.
     </p>
 
     <div class="buttons">
