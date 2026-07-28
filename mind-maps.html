@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anesthesia Mind Maps — Anesthesia Study Co. LLC</title>
+  <meta name="description" content="Printable anesthesia mind maps for students and educators. $2.00 each or any 5 for $9.00. Educational use only.">
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.16);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.76);
+      --cyan: #00c2ff;
+      --purple: #6a11cb;
+      --yellow: #ffd84d;
+      --radius: 20px;
+      --max: 1080px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0,194,255,0.35), transparent 35%),
+        radial-gradient(circle at top right, rgba(106,17,203,0.35), transparent 35%),
+        linear-gradient(135deg, #07111f, #120626 65%, #081827);
+      line-height: 1.6;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(7, 17, 31, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav {
+      max-width: var(--max);
+      margin: auto;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--yellow));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 30px;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .brand small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .navlinks a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 12px;
+      font-size: 14px;
+    }
+
+    .navlinks a:hover,
+    .navlinks a[aria-current="page"] {
+      color: white;
+    }
+
+    main {
+      max-width: var(--max);
+      margin: auto;
+      padding: 36px 20px 140px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 22px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 32px;
+      line-height: 1.15;
+    }
+
+    p {
+      color: var(--muted);
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 13px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid var(--border);
+      color: white;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 15px;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #06101f;
+      border: none;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Pricing callout */
+    .pricing {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .price-tile {
+      flex: 1 1 220px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .price-tile .amount {
+      font-size: 30px;
+      font-weight: 900;
+      display: block;
+      line-height: 1.2;
+    }
+
+    .price-tile.best {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 1px rgba(255,216,77,0.35);
+    }
+
+    .price-tile .label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #06101f;
+      background: var(--yellow);
+      border-radius: 999px;
+      padding: 2px 10px;
+      margin-bottom: 6px;
+    }
+
+    /* Mind map grid */
+    .maps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .map {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+
+    .map:hover {
+      transform: translateY(-3px);
+      border-color: rgba(0,194,255,0.55);
+    }
+
+    .map.selected {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 1px rgba(255,216,77,0.45);
+    }
+
+    .thumb {
+      position: relative;
+      display: block;
+      aspect-ratio: 4 / 3;
+      background: linear-gradient(135deg, rgba(0,194,255,0.22), rgba(106,17,203,0.28));
+      overflow: hidden;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* Watermark band across every preview */
+    .thumb::after {
+      content: "PREVIEW · anesthesiastudyco.com";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.55);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.55);
+      pointer-events: none;
+    }
+
+    .thumb .fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .map-body {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .map-body h3 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .map-price {
+      color: var(--yellow);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .map-actions {
+      margin-top: auto;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .map-actions .btn {
+      padding: 9px 12px;
+      font-size: 13px;
+      border-radius: 11px;
+      flex: 1 1 auto;
+      text-align: center;
+    }
+
+    /* Sticky bundle summary */
+    .summary {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      background: rgba(7, 17, 31, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      transform: translateY(110%);
+      transition: transform 0.22s ease;
+    }
+
+    .summary.visible {
+      transform: translateY(0);
+    }
+
+    .summary-inner {
+      max-width: var(--max);
+      margin: auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .summary-text strong {
+      font-size: 20px;
+    }
+
+    .summary-text small {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .summary-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    ul {
+      color: var(--muted);
+      padding-left: 20px;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer a {
+      color: var(--muted);
+    }
+
+    @media (max-width: 850px) {
+      .maps {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .navlinks a {
+        margin-left: 0;
+        margin-right: 10px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .maps {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <nav>
+    <div class="brand">
+      <div class="logo">A</div>
+      <div>
+        <h1>Anesthesia Study Co. LLC</h1>
+        <small>Educational anesthesia tools</small>
+      </div>
+    </div>
+
+    <div class="navlinks">
+      <a href="index.html#app">App</a>
+      <a href="index.html#products">Products</a>
+      <a href="mind-maps.html" aria-current="page">Mind Maps</a>
+      <a href="index.html#social">Social</a>
+      <a href="index.html#support">Support</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>Anesthesia Mind Maps</h2>
+    <p>
+      High-resolution printable mind maps that condense anesthesia topics into single-page visual
+      references — built for exam review, case preparation, and clinical reasoning practice.
+      Each purchase is an instant digital download (PNG).
+    </p>
+    <p>
+      <strong>Educational only:</strong> These mind maps are for educational purposes only
+      and are not medical advice.
+    </p>
+
+    <div class="pricing">
+      <div class="price-tile">
+        <span class="amount">$2.00</span>
+        <span class="label">Any single mind map</span>
+      </div>
+      <div class="price-tile best">
+        <span class="tag">Best value</span>
+        <span class="amount">$9.00</span>
+        <span class="label">Any 5 mind maps — save $1.00</span>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn primary" type="button" data-bundle-jump>Build a 5-Map Bundle</button>
+      <a class="btn" href="index.html#support">Questions? Contact Support</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 style="font-size:24px">Browse the collection</h2>
+    <p id="collection-note">
+      Tap <strong>Add to bundle</strong> on any five maps and the bundle price applies automatically.
+      Bundle pricing repeats for every five maps selected.
+    </p>
+
+    <div class="maps" id="maps"></div>
+
+    <noscript>
+      <p>
+        Mind maps are $2.00 each or any 5 for $9.00.
+        <a href="https://www.etsy.com/shop/AnesthesiaStudyCo?ref=seller-platform-mcnav" target="_blank" rel="noopener">Browse the full collection on Etsy</a>.
+      </p>
+    </noscript>
+  </section>
+
+  <section class="card">
+    <h2 style="font-size:24px">What you get</h2>
+    <ul>
+      <li>High-resolution PNG, sized for letter/A4 printing or tablet annotation</li>
+      <li>Instant download after checkout — no shipping, no waiting</li>
+      <li>Single-user educational license for personal study use</li>
+      <li>Bundle any five maps for $9.00 — mix and match topics freely</li>
+    </ul>
+  </section>
+
+  <footer>
+    <div>© <span id="year"></span> Anesthesia Study Co. LLC. All rights reserved.</div>
+    <div>
+      <a href="privacy.html">Privacy Policy</a> ·
+      <a href="mailto:admin@anesthesiastudyco.com">Support</a>
+    </div>
+  </footer>
+
+</main>
+
+<div class="summary" id="summary" role="region" aria-label="Bundle summary">
+  <div class="summary-inner">
+    <div class="summary-text">
+      <strong id="summary-total">$0.00</strong>
+      <small id="summary-detail">No maps selected</small>
+    </div>
+    <div class="summary-actions">
+      <button class="btn" type="button" id="clear-bundle">Clear</button>
+      <a class="btn primary" id="checkout-link" href="#" target="_blank" rel="noopener">Checkout</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* =====================================================================
+     MIND MAP CATALOG — edit this list when adding, renaming, or removing maps.
+     ---------------------------------------------------------------------
+     file      Preview image in assets/mind-maps/. See assets/mind-maps/README.md.
+               Upload a WATERMARKED, LOW-RESOLUTION preview only — anything in
+               this folder is publicly downloadable. The full-resolution file
+               the buyer receives is delivered by the store, not from this site.
+     title     Shown on the card. Rename to the real topic of each map.
+     url       Direct product listing URL. Leave null to fall back to SHOP_URL.
+     published Set to false to hide a slot that has no artwork yet.
+     ===================================================================== */
+  var SHOP_URL = "https://www.etsy.com/shop/AnesthesiaStudyCo?ref=seller-platform-mcnav";
+  var PRICE_SINGLE = 2.00;
+  var BUNDLE_SIZE = 5;
+  var BUNDLE_PRICE = 9.00;
+
+  var MAPS = [
+    { file: "mind-map-01.png", title: "Mind Map 1",  url: null, published: true },
+    { file: "mind-map-02.png", title: "Mind Map 2",  url: null, published: true },
+    { file: "mind-map-03.png", title: "Mind Map 3",  url: null, published: true },
+    { file: "mind-map-04.png", title: "Mind Map 4",  url: null, published: true },
+    { file: "mind-map-05.png", title: "Mind Map 5",  url: null, published: true },
+    { file: "mind-map-06.png", title: "Mind Map 6",  url: null, published: true },
+    { file: "mind-map-07.png", title: "Mind Map 7",  url: null, published: true },
+    { file: "mind-map-08.png", title: "Mind Map 8",  url: null, published: true },
+    { file: "mind-map-09.png", title: "Mind Map 9",  url: null, published: true },
+    { file: "mind-map-10.png", title: "Mind Map 10", url: null, published: true },
+    { file: "mind-map-11.png", title: "Mind Map 11", url: null, published: true },
+    { file: "mind-map-12.png", title: "Mind Map 12", url: null, published: true },
+    { file: "mind-map-13.png", title: "Mind Map 13", url: null, published: true },
+    { file: "mind-map-14.png", title: "Mind Map 14", url: null, published: true },
+    { file: "mind-map-15.png", title: "Mind Map 15", url: null, published: true },
+    { file: "mind-map-16.png", title: "Mind Map 16", url: null, published: true },
+    { file: "mind-map-17.png", title: "Mind Map 17", url: null, published: true },
+    { file: "mind-map-18.png", title: "Mind Map 18", url: null, published: true },
+    { file: "mind-map-19.png", title: "Mind Map 19", url: null, published: true },
+    { file: "mind-map-20.png", title: "Mind Map 20", url: null, published: true }
+  ];
+
+  /* ---------------------------------------------------------------- */
+
+  var catalog = MAPS.filter(function (m) { return m.published !== false; });
+  var selected = [];
+
+  function money(n) {
+    return "$" + n.toFixed(2);
+  }
+
+  /* Bundle pricing: every complete group of 5 costs $9.00, the rest are $2.00 each. */
+  function priceFor(count) {
+    var bundles = Math.floor(count / BUNDLE_SIZE);
+    var singles = count % BUNDLE_SIZE;
+    return bundles * BUNDLE_PRICE + singles * PRICE_SINGLE;
+  }
+
+  /* Netlify Image CDN keeps previews small and fast, and serves WebP/AVIF automatically. */
+  function previewSrc(file) {
+    return "/.netlify/images?url=" + encodeURIComponent("/assets/mind-maps/" + file) +
+           "&w=600&h=450&fit=cover&q=60";
+  }
+
+  function render() {
+    var grid = document.getElementById("maps");
+    grid.innerHTML = "";
+
+    catalog.forEach(function (map, i) {
+      var card = document.createElement("article");
+      card.className = "map";
+      card.setAttribute("data-index", i);
+
+      var thumb = document.createElement("div");
+      thumb.className = "thumb";
+
+      var img = document.createElement("img");
+      img.src = previewSrc(map.file);
+      img.alt = map.title + " anesthesia mind map preview";
+      img.loading = "lazy";
+      img.decoding = "async";
+      /* Missing artwork degrades to a labelled placeholder instead of a broken image. */
+      img.addEventListener("error", function () {
+        img.remove();
+        var fallback = document.createElement("span");
+        fallback.className = "fallback";
+        fallback.textContent = "Preview image coming soon";
+        thumb.appendChild(fallback);
+      });
+      thumb.appendChild(img);
+
+      var body = document.createElement("div");
+      body.className = "map-body";
+
+      var h3 = document.createElement("h3");
+      h3.textContent = map.title;
+
+      var price = document.createElement("div");
+      price.className = "map-price";
+      price.textContent = money(PRICE_SINGLE) + " · or 5 for " + money(BUNDLE_PRICE);
+
+      var actions = document.createElement("div");
+      actions.className = "map-actions";
+
+      var add = document.createElement("button");
+      add.type = "button";
+      add.className = "btn";
+      add.textContent = "Add to bundle";
+      add.setAttribute("aria-pressed", "false");
+      add.addEventListener("click", function () {
+        toggle(i, card, add);
+      });
+
+      var buy = document.createElement("a");
+      buy.className = "btn primary";
+      buy.href = map.url || SHOP_URL;
+      buy.target = "_blank";
+      buy.rel = "noopener";
+      buy.textContent = "Buy " + money(PRICE_SINGLE);
+
+      actions.appendChild(add);
+      actions.appendChild(buy);
+      body.appendChild(h3);
+      body.appendChild(price);
+      body.appendChild(actions);
+      card.appendChild(thumb);
+      card.appendChild(body);
+      grid.appendChild(card);
+    });
+  }
+
+  function toggle(index, card, button) {
+    var at = selected.indexOf(index);
+
+    if (at === -1) {
+      selected.push(index);
+      card.classList.add("selected");
+      button.textContent = "Remove";
+      button.setAttribute("aria-pressed", "true");
+    } else {
+      selected.splice(at, 1);
+      card.classList.remove("selected");
+      button.textContent = "Add to bundle";
+      button.setAttribute("aria-pressed", "false");
+    }
+
+    updateSummary();
+  }
+
+  function updateSummary() {
+    var bar = document.getElementById("summary");
+    var count = selected.length;
+
+    if (count === 0) {
+      bar.classList.remove("visible");
+      return;
+    }
+
+    var total = priceFor(count);
+    var full = count * PRICE_SINGLE;
+    var saved = full - total;
+    var toNext = (BUNDLE_SIZE - (count % BUNDLE_SIZE)) % BUNDLE_SIZE;
+
+    var detail = count + (count === 1 ? " map selected" : " maps selected");
+    if (saved > 0) {
+      detail += " · saving " + money(saved);
+    }
+    if (toNext > 0) {
+      detail += " · add " + toNext + " more for the " + money(BUNDLE_PRICE) + " bundle";
+    }
+
+    document.getElementById("summary-total").textContent = money(total);
+    document.getElementById("summary-detail").textContent = detail;
+
+    /* Titles travel to the store so the buyer knows which maps they picked. */
+    var titles = selected.map(function (i) { return catalog[i].title; }).join(", ");
+    var link = document.getElementById("checkout-link");
+    link.href = SHOP_URL;
+    link.textContent = "Checkout " + money(total);
+    link.title = "Selected: " + titles;
+
+    bar.classList.add("visible");
+  }
+
+  function clearBundle() {
+    selected = [];
+    document.querySelectorAll(".map").forEach(function (card) {
+      card.classList.remove("selected");
+      var button = card.querySelector(".map-actions .btn");
+      button.textContent = "Add to bundle";
+      button.setAttribute("aria-pressed", "false");
+    });
+    updateSummary();
+  }
+
+  render();
+  document.getElementById("clear-bundle").addEventListener("click", clearBundle);
+  document.querySelector("[data-bundle-jump]").addEventListener("click", function () {
+    document.getElementById("maps").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
