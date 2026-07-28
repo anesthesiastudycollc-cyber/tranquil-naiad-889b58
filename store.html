@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital Store — Anesthesia Study Co. LLC</title>
+  <meta name="description" content="Buy anesthesia study guides, printable one-pagers, mind maps, and interactive anesthesia apps. Pay by card and download instantly.">
+
+  <script>function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"5bcf70c70b90b0cb12a614281ae98661"})});</script>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.16);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.76);
+      --cyan: #00c2ff;
+      --purple: #6a11cb;
+      --yellow: #ffd84d;
+      --radius: 20px;
+      --max: 1080px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0,194,255,0.35), transparent 35%),
+        radial-gradient(circle at top right, rgba(106,17,203,0.35), transparent 35%),
+        linear-gradient(135deg, #07111f, #120626 65%, #081827);
+      line-height: 1.6;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(7, 17, 31, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav {
+      max-width: var(--max);
+      margin: auto;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--yellow));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 30px;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .brand small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .navlinks a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 12px;
+      font-size: 14px;
+    }
+
+    .navlinks a:hover,
+    .navlinks a[aria-current="page"] {
+      color: white;
+    }
+
+    main {
+      max-width: var(--max);
+      margin: auto;
+      padding: 36px 20px 140px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 22px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 32px;
+      line-height: 1.15;
+    }
+
+    h3 {
+      margin: 0 0 6px;
+      font-size: 19px;
+    }
+
+    p {
+      color: var(--muted);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 13px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid var(--border);
+      color: white;
+      font-weight: 700;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #06101f;
+      border: none;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    /* --- instant-delivery promises under the store heading --- */
+    .promises {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .promises li {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: rgba(0,194,255,0.14);
+      border: 1px solid rgba(0,194,255,0.35);
+    }
+
+    /* --- category filters --- */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .chip {
+      padding: 10px 15px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .chip[aria-pressed="true"] {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #06101f;
+      border-color: transparent;
+    }
+
+    /* --- product grid --- */
+    .section-head {
+      margin: 30px 0 14px;
+    }
+
+    .section-head h2 {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .section-head p {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 16px;
+    }
+
+    .product {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+
+    .product:hover {
+      transform: translateY(-3px);
+      border-color: rgba(0,194,255,0.45);
+    }
+
+    .product[data-selected="true"] {
+      border-color: var(--cyan);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(0,194,255,0.5);
+    }
+
+    .product-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .price {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--yellow);
+      white-space: nowrap;
+    }
+
+    .tag {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .format {
+      margin: 0;
+      font-size: 13px;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .product p.blurb {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .highlights {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .product .add {
+      margin-top: auto;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* --- loading and empty states --- */
+    .skeleton {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 22px;
+      min-height: 230px;
+    }
+
+    .skeleton span {
+      display: block;
+      height: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+      background-size: 200% 100%;
+      animation: shimmer 1.4s linear infinite;
+    }
+
+    .skeleton span:nth-child(1) { width: 45%; height: 22px; }
+    .skeleton span:nth-child(2) { width: 90%; }
+    .skeleton span:nth-child(3) { width: 75%; }
+    .skeleton span:nth-child(4) { width: 82%; }
+
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .skeleton span { animation: none; }
+      .product { transition: none; }
+    }
+
+    /* --- notices --- */
+    .notice {
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 15px;
+      border: 1px solid;
+    }
+
+    .notice.warn {
+      background: rgba(255,216,77,0.10);
+      border-color: rgba(255,216,77,0.45);
+    }
+
+    .notice.error {
+      background: rgba(255,99,99,0.12);
+      border-color: rgba(255,99,99,0.45);
+    }
+
+    .notice a {
+      color: var(--cyan);
+    }
+
+    /* --- cart bar --- */
+    .cartbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      background: rgba(7,17,31,0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: 14px 20px;
+    }
+
+    .cartbar-inner {
+      max-width: var(--max);
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .cart-total {
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    .cart-total strong {
+      color: var(--text);
+      font-size: 20px;
+    }
+
+    .cart-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .cart-error {
+      width: 100%;
+      color: #ffb3b3;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      margin-top: 30px;
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer a {
+      color: var(--muted);
+    }
+
+    @media (max-width: 850px) {
+      .navlinks a {
+        margin-left: 0;
+        margin-right: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <nav>
+    <a class="brand" href="index.html">
+      <div class="logo">A</div>
+      <div>
+        <h1>Anesthesia Study Co. LLC</h1>
+        <small>Educational anesthesia tools</small>
+      </div>
+    </a>
+
+    <div class="navlinks">
+      <a href="index.html">Home</a>
+      <a href="store.html" aria-current="page">Store</a>
+      <a href="index.html#app">App</a>
+      <a href="index.html#support">Support</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>Digital store</h2>
+    <p>
+      Pick the study guides, one-pagers, mind maps, and interactive apps you want, pay securely by card,
+      and download everything on the next screen. Nothing ships and nothing waits for approval.
+    </p>
+    <ul class="promises">
+      <li>Instant download after payment</li>
+      <li>Card payments handled by Stripe</li>
+      <li>Links stay valid for 30 days</li>
+    </ul>
+    <p style="margin-bottom:0">
+      <strong>Educational only:</strong> These products are for educational purposes only
+      and are not medical advice.
+    </p>
+  </section>
+
+  <div id="notices"></div>
+
+  <div class="filters" id="filters"></div>
+
+  <div id="catalog">
+    <div class="products">
+      <div class="skeleton"><span></span><span></span><span></span><span></span></div>
+      <div class="skeleton"><span></span><span></span><span></span><span></span></div>
+      <div class="skeleton"><span></span><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <footer>
+    <div>© <span id="year"></span> Anesthesia Study Co. LLC. All rights reserved.</div>
+    <div>
+      <a href="privacy.html">Privacy Policy</a> ·
+      <a href="mailto:admin@anesthesiastudyco.com">Support</a>
+    </div>
+  </footer>
+
+</main>
+
+<aside class="cartbar" id="cartbar" hidden aria-live="polite">
+  <div class="cartbar-inner">
+    <div class="cart-total" id="cartTotal"></div>
+    <div class="cart-actions">
+      <button type="button" class="btn" id="clearCart">Clear</button>
+      <button type="button" class="btn primary" id="checkout">Checkout securely</button>
+    </div>
+    <p class="cart-error" id="cartError" hidden></p>
+  </div>
+</aside>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  var CART_KEY = "asc.cart.v1";
+  var money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+
+  var state = {
+    products: [],
+    categories: [],
+    checkoutEnabled: false,
+    filter: "all",
+    cart: loadCart()
+  };
+
+  function loadCart() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(CART_KEY));
+      return Array.isArray(raw) ? raw.filter(function (id) { return typeof id === "string"; }) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function saveCart() {
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(state.cart));
+    } catch (error) {
+      /* Storage may be unavailable in private browsing; the cart still works in-page. */
+    }
+  }
+
+  function notice(kind, html) {
+    var element = document.createElement("div");
+    element.className = "notice " + kind;
+    element.innerHTML = html;
+    document.getElementById("notices").appendChild(element);
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"]/g, function (character) {
+      return "&#" + character.charCodeAt(0) + ";";
+    });
+  }
+
+  function categoryName(id) {
+    var match = state.categories.filter(function (category) { return category.id === id; })[0];
+    return match ? match.name : id;
+  }
+
+  function renderFilters() {
+    var filters = document.getElementById("filters");
+    var options = [{ id: "all", name: "Everything" }].concat(state.categories);
+
+    filters.innerHTML = "";
+    options.forEach(function (option) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "chip";
+      button.textContent = option.name;
+      button.setAttribute("aria-pressed", String(state.filter === option.id));
+      button.addEventListener("click", function () {
+        state.filter = option.id;
+        renderFilters();
+        renderCatalog();
+      });
+      filters.appendChild(button);
+    });
+  }
+
+  function productCard(product) {
+    var selected = state.cart.indexOf(product.id) !== -1;
+    var article = document.createElement("article");
+    article.className = "product";
+    article.setAttribute("data-selected", String(selected));
+
+    article.innerHTML =
+      '<div class="product-top">' +
+        '<span class="tag">' + escapeHtml(categoryName(product.categoryId)) + "</span>" +
+        '<span class="price">' + money.format(product.unitAmount / 100) + "</span>" +
+      "</div>" +
+      "<h3>" + escapeHtml(product.name) + "</h3>" +
+      '<p class="format">' + escapeHtml(product.format) + "</p>" +
+      '<p class="blurb">' + escapeHtml(product.description) + "</p>" +
+      '<ul class="highlights">' +
+        product.highlights.map(function (item) { return "<li>" + escapeHtml(item) + "</li>"; }).join("") +
+      "</ul>";
+
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn add" + (selected ? "" : " primary");
+    button.textContent = selected ? "Remove from cart" : "Add to cart";
+    button.setAttribute("aria-pressed", String(selected));
+    button.addEventListener("click", function () {
+      toggle(product.id);
+    });
+
+    article.appendChild(button);
+    return article;
+  }
+
+  function renderCatalog() {
+    var container = document.getElementById("catalog");
+    container.innerHTML = "";
+
+    var visible = state.categories.filter(function (category) {
+      return state.filter === "all" || category.id === state.filter;
+    });
+
+    visible.forEach(function (category) {
+      var items = state.products.filter(function (product) { return product.categoryId === category.id; });
+      if (items.length === 0) return;
+
+      var head = document.createElement("div");
+      head.className = "section-head";
+      head.innerHTML =
+        "<h2 id=" + JSON.stringify(category.id) + ">" + escapeHtml(category.name) + "</h2>" +
+        "<p>" + escapeHtml(category.tagline) + "</p>";
+      container.appendChild(head);
+
+      var grid = document.createElement("div");
+      grid.className = "products";
+      items.forEach(function (product) { grid.appendChild(productCard(product)); });
+      container.appendChild(grid);
+    });
+  }
+
+  function toggle(id) {
+    var index = state.cart.indexOf(id);
+    if (index === -1) {
+      state.cart.push(id);
+    } else {
+      state.cart.splice(index, 1);
+    }
+    saveCart();
+    renderCatalog();
+    renderCart();
+  }
+
+  function renderCart() {
+    var bar = document.getElementById("cartbar");
+    var total = document.getElementById("cartTotal");
+    var checkoutButton = document.getElementById("checkout");
+
+    // Drop ids that are no longer in the catalog before pricing the cart.
+    state.cart = state.cart.filter(function (id) {
+      return state.products.some(function (product) { return product.id === id; });
+    });
+
+    if (state.cart.length === 0) {
+      bar.hidden = true;
+      return;
+    }
+
+    var sum = state.cart.reduce(function (accumulator, id) {
+      var product = state.products.filter(function (item) { return item.id === id; })[0];
+      return accumulator + (product ? product.unitAmount : 0);
+    }, 0);
+
+    bar.hidden = false;
+    total.innerHTML =
+      state.cart.length + (state.cart.length === 1 ? " item" : " items") +
+      " · <strong>" + money.format(sum / 100) + "</strong>";
+
+    checkoutButton.disabled = !state.checkoutEnabled;
+    checkoutButton.textContent = state.checkoutEnabled ? "Checkout securely" : "Checkout unavailable";
+  }
+
+  function showCartError(message) {
+    var element = document.getElementById("cartError");
+    element.textContent = message;
+    element.hidden = !message;
+  }
+
+  document.getElementById("clearCart").addEventListener("click", function () {
+    state.cart = [];
+    saveCart();
+    showCartError("");
+    renderCatalog();
+    renderCart();
+  });
+
+  document.getElementById("checkout").addEventListener("click", async function () {
+    var button = this;
+    if (state.cart.length === 0) return;
+
+    button.disabled = true;
+    button.textContent = "Starting checkout…";
+    showCartError("");
+
+    try {
+      var response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: state.cart.map(function (id) { return { id: id }; }) })
+      });
+      var payload = await response.json();
+
+      if (!response.ok || !payload.url) {
+        throw new Error(payload.message || "Checkout could not be started.");
+      }
+
+      window.location.href = payload.url;
+      return;
+    } catch (error) {
+      showCartError(error.message + " If this keeps happening, email admin@anesthesiastudyco.com.");
+      button.disabled = false;
+      button.textContent = "Checkout securely";
+    }
+  });
+
+  (async function init() {
+    if (new URLSearchParams(window.location.search).get("checkout") === "cancelled") {
+      notice("warn", "Checkout was cancelled — nothing was charged. Your selection is still here.");
+    }
+
+    try {
+      var response = await fetch("/api/catalog");
+      if (!response.ok) throw new Error("Catalog request failed with status " + response.status);
+      var data = await response.json();
+
+      state.products = data.products || [];
+      state.categories = data.categories || [];
+      state.checkoutEnabled = Boolean(data.checkoutEnabled);
+
+      // Landing-page buttons deep-link to a category, e.g. store.html#one-pagers.
+      // The catalog is rendered client-side, so the hash is resolved here rather
+      // than by the browser.
+      var requested = window.location.hash.replace("#", "");
+      var matched = state.categories.some(function (category) { return category.id === requested; });
+      if (matched) state.filter = requested;
+
+      if (!state.checkoutEnabled) {
+        notice(
+          "warn",
+          "<strong>Card checkout is not switched on yet.</strong> Browse the catalog below, and in the " +
+            'meantime order from our <a href="https://www.etsy.com/shop/AnesthesiaStudyCo?ref=seller-platform-mcnav" target="_blank" rel="noopener">Etsy shop</a> ' +
+            'or email <a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a>.'
+        );
+      }
+
+      renderFilters();
+      renderCatalog();
+      renderCart();
+
+      if (matched) {
+        var heading = document.getElementById(requested);
+        if (heading) heading.scrollIntoView({ block: "start" });
+      }
+    } catch (error) {
+      document.getElementById("catalog").innerHTML = "";
+      notice(
+        "error",
+        "We could not load the store just now. Please refresh, or email " +
+          '<a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a> and we will help you order directly.'
+      );
+    }
+  })();
+</script>
+
+</body>
+</html>
