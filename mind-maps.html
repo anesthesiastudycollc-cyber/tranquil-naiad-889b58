@@ -676,7 +676,29 @@
     { file: "mind-map-111.png", title: "Sevoflurane", url: null, published: false },
     { file: "mind-map-112.png", title: "Desflurane", url: null, published: false },
     { file: "mind-map-113.png", title: "Dexmedetomidine (Precedex)", url: null, published: false },
-    { file: "mind-map-114.png", title: "Sevoflurane", url: null, published: false }
+    { file: "mind-map-114.png", title: "Sevoflurane", url: null, published: false },
+    /* Slots 115–126 are all re-exports of maps already on sale, so the whole batch is
+       hidden: 115 repeats slot 40, 116 repeats slot 3, 117 repeats slot 34, 118 repeats
+       slot 70, 119 repeats slot 96, 120 repeats slot 5, 121 repeats slot 63, 122 and 123
+       repeat slot 18, 124 repeats slot 11, 125 repeats slot 25, and 126 repeats slot 76.
+       Every pair was compared image by image — they are byte-different but visually the
+       same chart, so a hash comparison does not catch them. Replace any of these files
+       with new artwork, then publish that slot. */
+    { file: "mind-map-115.png", title: "Restrictive & Obstructive Pulmonary Disease", url: null, published: false },
+    { file: "mind-map-116.png", title: "Nitrous Oxide (N₂O)", url: null, published: false },
+    { file: "mind-map-117.png", title: "GI Anesthesia", url: null, published: false },
+    { file: "mind-map-118.png", title: "Glycopyrrolate (Robinul)", url: null, published: false },
+    { file: "mind-map-119.png", title: "Isoflurane", url: null, published: false },
+    { file: "mind-map-120.png", title: "ACLS Recognition & Treatment", url: null, published: false },
+    { file: "mind-map-121.png", title: "Anesthesia Technique Choices", url: null, published: false },
+    { file: "mind-map-122.png", title: "Orthopedic Anesthesia", url: null, published: false },
+    { file: "mind-map-123.png", title: "Orthopedic Anesthesia", url: null, published: false },
+    { file: "mind-map-124.png", title: "ENT Anesthesia", url: null, published: false },
+    { file: "mind-map-125.png", title: "Morphine", url: null, published: false },
+    /* Third etomidate export. Its induction dose (0.2–0.3 mg/kg) matches hidden slot 95
+       and disagrees with live slot 76 (0.15–0.3 mg/kg) — see the note above slot 95.
+       Two of the three exports now say 0.2–0.3. */
+    { file: "mind-map-126.png", title: "Etomidate", url: null, published: false }
   ];
 
   /* ---------------------------------------------------------------- */

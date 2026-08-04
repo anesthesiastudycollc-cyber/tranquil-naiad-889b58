@@ -27,7 +27,7 @@ Name files in sequence so they match the catalog in `mind-maps.html`:
 mind-map-01.png
 mind-map-02.png
 ...
-mind-map-114.png
+mind-map-126.png
 ```
 
 Gaps are fine, and files can arrive out of order — a filename with no catalog entry never
@@ -56,7 +56,10 @@ Two things are worth checking before publishing a slot:
 
 - **Is the artwork already in the gallery?** Batches have arrived containing the
   same map twice. Two identical cards let a customer buy the same map twice, so
-  keep the better export and leave the other `published: false`.
+  keep the better export and leave the other `published: false`. This is now the
+  most common thing to catch: 35 of the files here are repeats of a map already on
+  sale. Compare them by eye, not by checksum — repeat exports are almost always
+  byte-different but visually identical, so `md5sum` does not flag them.
 - **Does the slot have artwork at all?** An empty published slot still renders a
   card with an "Add to bundle" button, so a customer can pay for a map that does
   not exist. A slot with no file belongs at `published: false`.
