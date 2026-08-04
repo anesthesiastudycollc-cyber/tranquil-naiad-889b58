@@ -27,12 +27,13 @@ Name files in sequence so they match the catalog in `mind-maps.html`:
 mind-map-01.png
 mind-map-02.png
 ...
-mind-map-96.png
+mind-map-102.png
 ```
 
-Gaps are fine — `mind-map-81.png` through `mind-map-86.png` do not exist. A filename with
-no catalog entry never renders, and a catalog entry with no file must stay
-`published: false`.
+Gaps are fine, and files can arrive out of order — a filename with no catalog entry never
+renders, and a catalog entry with no file must stay `published: false`. Numbers past 99 are
+not zero-padded, so the folder does not sort in numeric order; the grid order comes from the
+`MAPS` array, not the filesystem.
 
 Drop the files in with these names and they appear on the storefront on the next
 deploy — no other change needed to show the artwork.
