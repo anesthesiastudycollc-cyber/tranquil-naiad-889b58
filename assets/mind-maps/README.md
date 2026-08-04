@@ -27,7 +27,7 @@ Name files in sequence so they match the catalog in `mind-maps.html`:
 mind-map-01.png
 mind-map-02.png
 ...
-mind-map-68.png
+mind-map-80.png
 ```
 
 Drop the files in with these names and they appear on the storefront on the next
