@@ -27,7 +27,7 @@ Name files in sequence so they match the catalog in `mind-maps.html`:
 mind-map-01.png
 mind-map-02.png
 ...
-mind-map-102.png
+mind-map-114.png
 ```
 
 Gaps are fine, and files can arrive out of order — a filename with no catalog entry never
