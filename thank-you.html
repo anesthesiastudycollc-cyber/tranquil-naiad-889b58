@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Your downloads — Anesthesia Study Co. LLC</title>
+  <meta name="description" content="Download your Anesthesia Study Co. LLC purchases.">
+
+  <style>
+    :root {
+      --card: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.16);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.76);
+      --cyan: #00c2ff;
+      --purple: #6a11cb;
+      --yellow: #ffd84d;
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0,194,255,0.35), transparent 35%),
+        radial-gradient(circle at top right, rgba(106,17,203,0.35), transparent 35%),
+        linear-gradient(135deg, #07111f, #120626 65%, #081827);
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 760px;
+      margin: auto;
+      padding: 48px 20px 70px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      margin-bottom: 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.15;
+    }
+
+    p {
+      color: var(--muted);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 13px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid var(--border);
+      color: white;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 15px;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #06101f;
+      border: none;
+    }
+
+    .items {
+      list-style: none;
+      margin: 20px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .items li {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .item-name {
+      font-weight: 700;
+      margin: 0;
+      color: var(--text);
+    }
+
+    .item-format {
+      margin: 0;
+      font-size: 13px;
+      color: var(--cyan);
+    }
+
+    .receipt {
+      display: flex;
+      gap: 22px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .receipt strong {
+      color: var(--text);
+    }
+
+    .hint {
+      font-size: 14px;
+    }
+
+    .status {
+      font-size: 15px;
+    }
+
+    a.plain {
+      color: var(--cyan);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      vertical-align: -3px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-top-color: var(--cyan);
+      animation: spin 800ms linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spinner { animation: none; }
+    }
+  </style>
+</head>
+
+<body>
+<main>
+  <div class="card" id="panel">
+    <h1><span class="spinner"></span>Confirming your payment</h1>
+    <p class="status">One moment while we unlock your downloads.</p>
+  </div>
+
+  <p class="hint" style="text-align:center">
+    <a class="plain" href="store.html">Back to the store</a> ·
+    <a class="plain" href="index.html">Home</a>
+  </p>
+</main>
+
+<script>
+  var money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+  var panel = document.getElementById("panel");
+  var sessionId = new URLSearchParams(window.location.search).get("session_id");
+  var attempt = 0;
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"]/g, function (character) {
+      return "&#" + character.charCodeAt(0) + ";";
+    });
+  }
+
+  function renderMessage(title, bodyHtml) {
+    panel.innerHTML = "<h1>" + escapeHtml(title) + "</h1>" + bodyHtml;
+  }
+
+  function renderWaiting(title, body) {
+    panel.innerHTML =
+      '<h1><span class="spinner"></span>' + escapeHtml(title) + "</h1>" +
+      '<p class="status">' + escapeHtml(body) + "</p>";
+  }
+
+  function renderOrder(order) {
+    // The purchase completed, so the store cart is no longer wanted.
+    try {
+      localStorage.removeItem("asc.cart.v1");
+    } catch (error) {
+      /* Ignore unavailable storage. */
+    }
+
+    var items = order.items || [];
+
+    var list = items
+      .map(function (item) {
+        return (
+          "<li><div>" +
+            '<p class="item-name">' + escapeHtml(item.name) + "</p>" +
+            '<p class="item-format">' + escapeHtml(item.format) + "</p>" +
+          "</div>" +
+          '<a class="btn primary" href="' + escapeHtml(item.downloadUrl) + '">Download</a></li>'
+        );
+      })
+      .join("");
+
+    panel.innerHTML =
+      "<h1>Payment complete — your files are ready</h1>" +
+      "<p>" +
+        (items.length === 1 ? "Your download is" : "All " + items.length + " downloads are") +
+        " available right now. " +
+        "Bookmark this page: the links keep working for 30 days." +
+      "</p>" +
+      '<ul class="items">' + list + "</ul>" +
+      '<div class="receipt">' +
+        (order.email ? "<span>Receipt sent to <strong>" + escapeHtml(order.email) + "</strong></span>" : "") +
+        "<span>Total paid <strong>" + money.format((order.amountTotal || 0) / 100) + "</strong></span>" +
+      "</div>" +
+      '<p class="hint">Trouble downloading? Email ' +
+        '<a class="plain" href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a> ' +
+        "and we will send your files directly.</p>";
+  }
+
+  async function load() {
+    attempt += 1;
+
+    try {
+      var response = await fetch("/api/order?session_id=" + encodeURIComponent(sessionId));
+      var payload = await response.json();
+
+      if (response.ok) {
+        renderOrder(payload);
+        return;
+      }
+
+      // Card payments can still be settling in the seconds after the redirect.
+      if (response.status === 402 && attempt < 6) {
+        renderWaiting("Still confirming your payment", "Your bank has not finished authorising yet. Retrying…");
+        setTimeout(load, 2500);
+        return;
+      }
+
+      renderMessage(
+        response.status === 402 ? "Payment not confirmed yet" : "We could not find that order",
+        "<p>" + escapeHtml(payload.message || "This order could not be located.") + "</p>" +
+          '<p class="hint">If you were charged, email ' +
+          '<a class="plain" href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a> ' +
+          "with your Stripe receipt and we will send your files straight away.</p>"
+      );
+    } catch (error) {
+      renderMessage(
+        "Something went wrong",
+        "<p>Your payment may well have succeeded — we just could not reach the order service.</p>" +
+          '<p class="hint">Refresh this page, or email ' +
+          '<a class="plain" href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a> ' +
+          "with your Stripe receipt.</p>"
+      );
+    }
+  }
+
+  if (!sessionId) {
+    renderMessage(
+      "No order to show",
+      '<p>This page shows your downloads straight after a purchase.</p>' +
+        '<p><a class="btn" href="store.html">Go to the store</a></p>'
+    );
+  } else {
+    load();
+  }
+</script>
+
+</body>
+</html>
