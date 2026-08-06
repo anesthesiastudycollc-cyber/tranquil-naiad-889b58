@@ -512,26 +512,193 @@
   var BUNDLE_PRICE = 9.00;
 
   var MAPS = [
-    { file: "mind-map-01.png", title: "Mind Map 1",  url: null, published: true },
-    { file: "mind-map-02.png", title: "Mind Map 2",  url: null, published: true },
-    { file: "mind-map-03.png", title: "Mind Map 3",  url: null, published: true },
-    { file: "mind-map-04.png", title: "Mind Map 4",  url: null, published: true },
-    { file: "mind-map-05.png", title: "Mind Map 5",  url: null, published: true },
-    { file: "mind-map-06.png", title: "Mind Map 6",  url: null, published: true },
-    { file: "mind-map-07.png", title: "Mind Map 7",  url: null, published: true },
-    { file: "mind-map-08.png", title: "Mind Map 8",  url: null, published: true },
-    { file: "mind-map-09.png", title: "Mind Map 9",  url: null, published: true },
-    { file: "mind-map-10.png", title: "Mind Map 10", url: null, published: true },
-    { file: "mind-map-11.png", title: "Mind Map 11", url: null, published: true },
-    { file: "mind-map-12.png", title: "Mind Map 12", url: null, published: true },
-    { file: "mind-map-13.png", title: "Mind Map 13", url: null, published: true },
-    { file: "mind-map-14.png", title: "Mind Map 14", url: null, published: true },
-    { file: "mind-map-15.png", title: "Mind Map 15", url: null, published: true },
-    { file: "mind-map-16.png", title: "Mind Map 16", url: null, published: true },
-    { file: "mind-map-17.png", title: "Mind Map 17", url: null, published: true },
-    { file: "mind-map-18.png", title: "Mind Map 18", url: null, published: true },
-    { file: "mind-map-19.png", title: "Mind Map 19", url: null, published: true },
-    { file: "mind-map-20.png", title: "Mind Map 20", url: null, published: true }
+    /* Slot 01 has no artwork yet — publish it once the preview is uploaded. */
+    { file: "mind-map-01.png", title: "Mind Map 1", url: null, published: false },
+    /* Artwork is the watermarked export also supplied as slot 23. */
+    { file: "mind-map-02.png", title: "Phenylephrine", url: null, published: true },
+    { file: "mind-map-03.png", title: "Nitrous Oxide (N₂O)", url: null, published: true },
+    /* Slot 04 is currently the same Nitrous Oxide artwork as slot 03 — hidden to
+       avoid listing the same map twice. Replace the file, then publish. */
+    { file: "mind-map-04.png", title: "Nitrous Oxide (N₂O)", url: null, published: false },
+    { file: "mind-map-05.png", title: "ACLS Recognition & Treatment", url: null, published: true },
+    { file: "mind-map-06.png", title: "Central Venous Line & CVP Measurement", url: null, published: true },
+    { file: "mind-map-07.png", title: "Bradycardia", url: null, published: true },
+    { file: "mind-map-08.png", title: "Clevidipine (Cleviprex)", url: null, published: true },
+    { file: "mind-map-09.png", title: "Ketamine", url: null, published: true },
+    { file: "mind-map-10.png", title: "Desflurane", url: null, published: true },
+    { file: "mind-map-11.png", title: "ENT Anesthesia", url: null, published: true },
+    { file: "mind-map-12.png", title: "Tachycardia", url: null, published: true },
+    { file: "mind-map-13.png", title: "Pulmonary Hypertension", url: null, published: true },
+    { file: "mind-map-14.png", title: "Types of Shock", url: null, published: true },
+    { file: "mind-map-15.png", title: "Dobutamine", url: null, published: true },
+    { file: "mind-map-16.png", title: "Tranexamic Acid (TXA)", url: null, published: true },
+    { file: "mind-map-17.png", title: "Arterial Line & Pressure Monitoring", url: null, published: true },
+    { file: "mind-map-18.png", title: "Orthopedic Anesthesia", url: null, published: true },
+    { file: "mind-map-19.png", title: "Induction of Anesthesia", url: null, published: true },
+    /* Slot 20 has no artwork yet — publish it once the preview is uploaded. */
+    { file: "mind-map-20.png", title: "Mind Map 20", url: null, published: false },
+    { file: "mind-map-21.png", title: "Norepinephrine", url: null, published: true },
+    { file: "mind-map-22.png", title: "Hydralazine", url: null, published: true },
+    /* Slot 23 is the same Phenylephrine artwork now used by slot 02 — hidden to
+       avoid listing the same map twice. */
+    { file: "mind-map-23.png", title: "Phenylephrine", url: null, published: false },
+    { file: "mind-map-24.png", title: "Neostigmine", url: null, published: true },
+    { file: "mind-map-25.png", title: "Morphine", url: null, published: true },
+    /* Slot 26 duplicates slot 24 (Neostigmine) — hidden. Replace the file, then publish. */
+    { file: "mind-map-26.png", title: "Neostigmine", url: null, published: false },
+    /* Slot 27 duplicates slot 25 (Morphine) — hidden. Replace the file, then publish. */
+    { file: "mind-map-27.png", title: "Morphine", url: null, published: false },
+    { file: "mind-map-28.png", title: "Massive Transfusion Protocol (MTP)", url: null, published: true },
+    { file: "mind-map-29.png", title: "Renal Considerations", url: null, published: true },
+    { file: "mind-map-30.png", title: "Labetalol", url: null, published: true },
+    { file: "mind-map-31.png", title: "Pre-Operative Treatments", url: null, published: true },
+    { file: "mind-map-32.png", title: "Pulmonary Artery Catheter (PAC) & CVP", url: null, published: true },
+    { file: "mind-map-33.png", title: "Anesthesia History", url: null, published: true },
+    { file: "mind-map-34.png", title: "GI Anesthesia", url: null, published: true },
+    { file: "mind-map-35.png", title: "Naloxone (Narcan)", url: null, published: true },
+    { file: "mind-map-36.png", title: "Neuroanesthesia", url: null, published: true },
+    { file: "mind-map-37.png", title: "Pre-Operative Interview", url: null, published: true },
+    { file: "mind-map-38.png", title: "Esmolol", url: null, published: true },
+    { file: "mind-map-39.png", title: "Regional Anesthesia", url: null, published: true },
+    { file: "mind-map-40.png", title: "Restrictive & Obstructive Pulmonary Disease", url: null, published: true },
+    { file: "mind-map-41.png", title: "Pediatric Anesthesia", url: null, published: true },
+    { file: "mind-map-42.png", title: "Anesthesia Overview", url: null, published: true },
+    { file: "mind-map-43.png", title: "Cardiopulmonary Bypass (CPB) & Anesthesia Machine", url: null, published: true },
+    { file: "mind-map-44.png", title: "Hypertension", url: null, published: true },
+    { file: "mind-map-45.png", title: "Anesthesia Instruments", url: null, published: true },
+    { file: "mind-map-46.png", title: "Dopamine", url: null, published: true },
+    /* Slot 47 duplicates slot 46 (Dopamine) — hidden. Replace the file, then publish. */
+    { file: "mind-map-47.png", title: "Dopamine", url: null, published: false },
+    { file: "mind-map-48.png", title: "Vecuronium", url: null, published: true },
+    { file: "mind-map-49.png", title: "Pulmonary Embolism (PE)", url: null, published: true },
+    /* Slot 50 duplicates slot 49 (Pulmonary Embolism) — hidden. Replace the file, then publish. */
+    { file: "mind-map-50.png", title: "Pulmonary Embolism (PE)", url: null, published: false },
+    { file: "mind-map-51.png", title: "Pancuronium", url: null, published: true },
+    { file: "mind-map-52.png", title: "Vasopressin", url: null, published: true },
+    /* Slot 53 duplicates slot 52 (Vasopressin) — hidden. Replace the file, then publish. */
+    { file: "mind-map-53.png", title: "Vasopressin", url: null, published: false },
+    { file: "mind-map-54.png", title: "Hypoxia", url: null, published: true },
+    { file: "mind-map-55.png", title: "Metoprolol", url: null, published: true },
+    { file: "mind-map-56.png", title: "Myocardial Infarction (MI)", url: null, published: true },
+    { file: "mind-map-57.png", title: "Ephedrine", url: null, published: true },
+    /* Overview of every invasive monitor — complements the single-topic maps at
+       slots 06 (CVP), 17 (arterial line), and 32 (PAC). */
+    { file: "mind-map-58.png", title: "Invasive Monitors Overview", url: null, published: true },
+    { file: "mind-map-59.png", title: "Cisatracurium", url: null, published: true },
+    { file: "mind-map-60.png", title: "Scopolamine", url: null, published: true },
+    { file: "mind-map-61.png", title: "Sevoflurane", url: null, published: true },
+    { file: "mind-map-62.png", title: "Nifedipine", url: null, published: true },
+    /* Technique-selection map (GA vs neuraxial vs regional vs MAC) — broader than
+       the induction map at slot 19 and the overview at slot 42. */
+    { file: "mind-map-63.png", title: "Anesthesia Technique Choices", url: null, published: true },
+    { file: "mind-map-64.png", title: "Tocolytics in Obstetric Anesthesia", url: null, published: true },
+    { file: "mind-map-65.png", title: "Aortic Stenosis", url: null, published: true },
+    { file: "mind-map-66.png", title: "Bronchospasm", url: null, published: true },
+    /* Slots 67 and 69 duplicate slot 65 (Aortic Stenosis) — hidden. Replace the files, then publish. */
+    { file: "mind-map-67.png", title: "Aortic Stenosis", url: null, published: false },
+    /* Slot 68 duplicates slot 66 (Bronchospasm) — hidden. Replace the file, then publish. */
+    { file: "mind-map-68.png", title: "Bronchospasm", url: null, published: false },
+    { file: "mind-map-69.png", title: "Aortic Stenosis", url: null, published: false },
+    { file: "mind-map-70.png", title: "Glycopyrrolate (Robinul)", url: null, published: true },
+    { file: "mind-map-71.png", title: "Epinephrine", url: null, published: true },
+    { file: "mind-map-72.png", title: "EKG Interpretation", url: null, published: true },
+    /* Title corrects the artwork, which renders the heading as "ATRICURIUM". */
+    { file: "mind-map-73.png", title: "Atracurium", url: null, published: true },
+    /* Reading and responding to monitor data — distinct from the invasive-monitor
+       hardware overview at slot 58. */
+    { file: "mind-map-74.png", title: "Anesthesia Monitors & Meaning", url: null, published: true },
+    { file: "mind-map-75.png", title: "IV Medication Pharmacokinetics & Pharmacodynamics", url: null, published: true },
+    { file: "mind-map-76.png", title: "Etomidate", url: null, published: true },
+    { file: "mind-map-77.png", title: "Atropine", url: null, published: true },
+    { file: "mind-map-78.png", title: "Hypotension", url: null, published: true },
+    { file: "mind-map-79.png", title: "IV Access & Fluid Management", url: null, published: true },
+    /* Slot 80 duplicates slot 79 (IV Access & Fluid Management) — hidden. Replace the file, then publish. */
+    { file: "mind-map-80.png", title: "IV Access & Fluid Management", url: null, published: false },
+    /* Slots 81–86 arrived after 87–96, so they are listed here to keep the grid in
+       numeric order. */
+    { file: "mind-map-81.png", title: "Anesthesia Gas Laws", url: null, published: true },
+    { file: "mind-map-82.png", title: "Rocuronium", url: null, published: true },
+    /* Foundations chart from the "Assess the…" series — a different chart from the
+       formal overview at slot 42, which is organized by perioperative phase. */
+    { file: "mind-map-83.png", title: "Anesthesia Basics", url: null, published: true },
+    { file: "mind-map-84.png", title: "Mechanical Ventilator Modes & Settings", url: null, published: true },
+    /* Slot 85 duplicates slot 84 (Mechanical Ventilator Modes & Settings) — hidden.
+       Replace the file, then publish. */
+    { file: "mind-map-85.png", title: "Mechanical Ventilator Modes & Settings", url: null, published: false },
+    { file: "mind-map-86.png", title: "Cardiac Considerations", url: null, published: true },
+    { file: "mind-map-87.png", title: "Midazolam (Versed)", url: null, published: true },
+    { file: "mind-map-88.png", title: "Stroke", url: null, published: true },
+    { file: "mind-map-89.png", title: "Dexmedetomidine (Precedex)", url: null, published: true },
+    /* Comparison of all five inotropes — complements the single-drug maps at slots
+       15 (dobutamine), 21 (norepinephrine), 46 (dopamine), and 71 (epinephrine). */
+    { file: "mind-map-90.png", title: "Inotropes Compared", url: null, published: true },
+    /* Slot 91 duplicates slot 90 (Inotropes Compared) — hidden. Replace the file, then publish. */
+    { file: "mind-map-91.png", title: "Inotropes Compared", url: null, published: false },
+    /* Same subject as slot 37 but a different chart, built around the A-I-D-E-A-L
+       mnemonic. Titled to tell the two apart on the shelf. */
+    { file: "mind-map-92.png", title: "Pre-Operative Interview (A-I-D-E-A-L Framework)", url: null, published: true },
+    { file: "mind-map-93.png", title: "Hepatic Considerations", url: null, published: true },
+    /* Slot 94 duplicates slot 92 (Pre-Operative Interview) — hidden. Replace the file, then publish. */
+    { file: "mind-map-94.png", title: "Pre-Operative Interview (A-I-D-E-A-L Framework)", url: null, published: false },
+    /* Second etomidate map; slot 76 is the live one. Their induction dose ranges
+       disagree (0.15–0.3 vs 0.2–0.3 mg/kg), so only one should ever be published. */
+    { file: "mind-map-95.png", title: "Etomidate", url: null, published: false },
+    { file: "mind-map-96.png", title: "Isoflurane", url: null, published: true },
+    { file: "mind-map-97.png", title: "Endocrine Considerations", url: null, published: true },
+    { file: "mind-map-98.png", title: "Hydromorphone (Dilaudid)", url: null, published: true },
+    { file: "mind-map-99.png", title: "Patient Positioning", url: null, published: true },
+    { file: "mind-map-100.png", title: "Airway Management", url: null, published: true },
+    /* Inhaled counterpart to the IV pharmacokinetics map at slot 75. */
+    { file: "mind-map-101.png", title: "Inhalational Agent Pharmacokinetics & Pharmacodynamics", url: null, published: true },
+    /* Slot 102 duplicates slot 101 (Inhalational Agent PK/PD) — hidden. Replace the
+       file, then publish. */
+    { file: "mind-map-102.png", title: "Inhalational Agent Pharmacokinetics & Pharmacodynamics", url: null, published: false },
+    /* Machine itself, from the "Assess the…" series. Slot 43 covers the machine only in
+       the context of cardiopulmonary bypass; slot 45 is the instrument tray. */
+    { file: "mind-map-103.png", title: "Anesthesia Machine", url: null, published: true },
+    /* Counterpart to the induction map at slot 19. */
+    { file: "mind-map-104.png", title: "Emergence of Anesthesia", url: null, published: true },
+    /* Covers AS, AR, MS and MR side by side. Slot 65 is a deep dive on aortic stenosis
+       alone, so the two complement each other. */
+    { file: "mind-map-105.png", title: "Cardiac Valvular Disease", url: null, published: true },
+    { file: "mind-map-106.png", title: "Fentanyl", url: null, published: true },
+    /* Slot 107 duplicates slot 104 (Emergence of Anesthesia) — hidden. Replace the
+       file, then publish. */
+    { file: "mind-map-107.png", title: "Emergence of Anesthesia", url: null, published: false },
+    { file: "mind-map-108.png", title: "Propofol", url: null, published: true },
+    /* Slots 109–114 all repeat maps that are already on sale, so they are hidden:
+       109 repeats slot 56, 110 repeats slot 108, 111 and 114 repeat slot 61,
+       112 repeats slot 10, and 113 repeats slot 89. Their content matches the live
+       versions, so nothing is being withheld from the shelf. Replace any of these
+       files with new artwork, then publish that slot. */
+    { file: "mind-map-109.png", title: "Myocardial Infarction (MI)", url: null, published: false },
+    { file: "mind-map-110.png", title: "Propofol", url: null, published: false },
+    { file: "mind-map-111.png", title: "Sevoflurane", url: null, published: false },
+    { file: "mind-map-112.png", title: "Desflurane", url: null, published: false },
+    { file: "mind-map-113.png", title: "Dexmedetomidine (Precedex)", url: null, published: false },
+    { file: "mind-map-114.png", title: "Sevoflurane", url: null, published: false },
+    /* Slots 115–126 are all re-exports of maps already on sale, so the whole batch is
+       hidden: 115 repeats slot 40, 116 repeats slot 3, 117 repeats slot 34, 118 repeats
+       slot 70, 119 repeats slot 96, 120 repeats slot 5, 121 repeats slot 63, 122 and 123
+       repeat slot 18, 124 repeats slot 11, 125 repeats slot 25, and 126 repeats slot 76.
+       Every pair was compared image by image — they are byte-different but visually the
+       same chart, so a hash comparison does not catch them. Replace any of these files
+       with new artwork, then publish that slot. */
+    { file: "mind-map-115.png", title: "Restrictive & Obstructive Pulmonary Disease", url: null, published: false },
+    { file: "mind-map-116.png", title: "Nitrous Oxide (N₂O)", url: null, published: false },
+    { file: "mind-map-117.png", title: "GI Anesthesia", url: null, published: false },
+    { file: "mind-map-118.png", title: "Glycopyrrolate (Robinul)", url: null, published: false },
+    { file: "mind-map-119.png", title: "Isoflurane", url: null, published: false },
+    { file: "mind-map-120.png", title: "ACLS Recognition & Treatment", url: null, published: false },
+    { file: "mind-map-121.png", title: "Anesthesia Technique Choices", url: null, published: false },
+    { file: "mind-map-122.png", title: "Orthopedic Anesthesia", url: null, published: false },
+    { file: "mind-map-123.png", title: "Orthopedic Anesthesia", url: null, published: false },
+    { file: "mind-map-124.png", title: "ENT Anesthesia", url: null, published: false },
+    { file: "mind-map-125.png", title: "Morphine", url: null, published: false },
+    /* Third etomidate export. Its induction dose (0.2–0.3 mg/kg) matches hidden slot 95
+       and disagrees with live slot 76 (0.15–0.3 mg/kg) — see the note above slot 95.
+       Two of the three exports now say 0.2–0.3. */
+    { file: "mind-map-126.png", title: "Etomidate", url: null, published: false }
   ];
 
   /* ---------------------------------------------------------------- */
