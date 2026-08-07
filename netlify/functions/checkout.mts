@@ -1,5 +1,6 @@
 import type { Config } from "@netlify/functions";
 import { getProduct } from "../lib/catalog.js";
+import { isMindMap, mindMapBundleSaving } from "../lib/mind-maps.js";
 import { getStripe, notConfiguredResponse, siteOrigin, stripeConfigured } from "../lib/stripe.js";
 
 /**
@@ -42,7 +43,31 @@ export default async (req: Request) => {
   const origin = siteOrigin(req);
   const stripe = getStripe();
 
+  // A cancelled checkout should land back where it started. The page is chosen
+  // from a fixed set rather than taken from the request, so the body cannot
+  // redirect a customer somewhere off-site.
+  const cancelPath = (body as { cancelTo?: unknown })?.cancelTo === "mind-maps" ? "/mind-maps.html" : "/store.html";
+
+  // Mind maps are $2 each or any five for $9. The saving is applied as an
+  // order-level discount rather than a cheaper "bundle" line item so that every
+  // paid line still names exactly one product — which is what fulfilment reads
+  // to decide who may download what.
+  const saving = mindMapBundleSaving(products.filter((product) => isMindMap(product.id)).length);
+
   try {
+    let discounts: { coupon: string }[] | undefined;
+
+    if (saving > 0) {
+      const coupon = await stripe.coupons.create({
+        amount_off: saving,
+        currency: "usd",
+        duration: "once",
+        max_redemptions: 1,
+        name: "Mind map bundle — any 5 for $9",
+      });
+      discounts = [{ coupon: coupon.id }];
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: products.map((product) => ({
@@ -58,9 +83,11 @@ export default async (req: Request) => {
           },
         },
       })),
-      allow_promotion_codes: true,
+      // Stripe rejects a session that both carries a discount and invites a
+      // promotion code, so the automatic bundle saving takes precedence.
+      ...(discounts ? { discounts } : { allow_promotion_codes: true }),
       success_url: `${origin}/thank-you.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/store.html?checkout=cancelled`,
+      cancel_url: `${origin}${cancelPath}?checkout=cancelled`,
     });
 
     if (!session.url) {

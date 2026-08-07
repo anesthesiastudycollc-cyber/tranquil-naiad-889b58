@@ -305,6 +305,17 @@
       text-align: center;
     }
 
+    /* Checkout status: unavailable payments, network failures, empty catalog */
+    .notice {
+      margin: 0 0 16px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--yellow);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 14px;
+    }
+
     /* Sticky bundle summary */
     .summary {
       position: fixed;
@@ -451,6 +462,8 @@
       Bundle pricing repeats for every five maps selected.
     </p>
 
+    <p class="notice" id="notice" hidden></p>
+
     <div class="maps" id="maps"></div>
 
     <noscript>
@@ -489,232 +502,40 @@
     </div>
     <div class="summary-actions">
       <button class="btn" type="button" id="clear-bundle">Clear</button>
-      <a class="btn primary" id="checkout-link" href="#" target="_blank" rel="noopener">Checkout</a>
+      <button class="btn primary" type="button" id="checkout-link">Checkout</button>
     </div>
   </div>
 </div>
 
 <script>
   /* =====================================================================
-     MIND MAP CATALOG — edit this list when adding, renaming, or removing maps.
-     ---------------------------------------------------------------------
-     file      Preview image in assets/mind-maps/. See assets/mind-maps/README.md.
-               Upload a WATERMARKED, LOW-RESOLUTION preview only — anything in
-               this folder is publicly downloadable. The full-resolution file
-               the buyer receives is delivered by the store, not from this site.
-     title     Shown on the card. Rename to the real topic of each map.
-     url       Direct product listing URL. Leave null to fall back to SHOP_URL.
-     published Set to false to hide a slot that has no artwork yet.
+     Mind maps are rendered from /api/mind-maps, and buying one posts its id to
+     /api/checkout. Titles and prices are NOT held here any more: they live in
+     netlify/lib/mind-maps.ts, which is the same list the server prices a real
+     charge from, so a tampered page cannot change what a customer is charged.
+
+     To add, rename, or retire a map, edit netlify/lib/mind-maps.ts.
+
+     Without a Stripe key the page still browses normally and every buy button
+     falls back to the Etsy shop, so the collection is never a dead end.
      ===================================================================== */
   var SHOP_URL = "https://www.etsy.com/shop/AnesthesiaStudyCo?ref=seller-platform-mcnav";
-  var PRICE_SINGLE = 2.00;
-  var BUNDLE_SIZE = 5;
-  var BUNDLE_PRICE = 9.00;
 
-  var MAPS = [
-    /* Slot 01 has no artwork yet — publish it once the preview is uploaded. */
-    { file: "mind-map-01.png", title: "Mind Map 1", url: null, published: false },
-    /* Artwork is the watermarked export also supplied as slot 23. */
-    { file: "mind-map-02.png", title: "Phenylephrine", url: null, published: true },
-    { file: "mind-map-03.png", title: "Nitrous Oxide (N₂O)", url: null, published: true },
-    /* Slot 04 is currently the same Nitrous Oxide artwork as slot 03 — hidden to
-       avoid listing the same map twice. Replace the file, then publish. */
-    { file: "mind-map-04.png", title: "Nitrous Oxide (N₂O)", url: null, published: false },
-    { file: "mind-map-05.png", title: "ACLS Recognition & Treatment", url: null, published: true },
-    { file: "mind-map-06.png", title: "Central Venous Line & CVP Measurement", url: null, published: true },
-    { file: "mind-map-07.png", title: "Bradycardia", url: null, published: true },
-    { file: "mind-map-08.png", title: "Clevidipine (Cleviprex)", url: null, published: true },
-    { file: "mind-map-09.png", title: "Ketamine", url: null, published: true },
-    { file: "mind-map-10.png", title: "Desflurane", url: null, published: true },
-    { file: "mind-map-11.png", title: "ENT Anesthesia", url: null, published: true },
-    { file: "mind-map-12.png", title: "Tachycardia", url: null, published: true },
-    { file: "mind-map-13.png", title: "Pulmonary Hypertension", url: null, published: true },
-    { file: "mind-map-14.png", title: "Types of Shock", url: null, published: true },
-    { file: "mind-map-15.png", title: "Dobutamine", url: null, published: true },
-    { file: "mind-map-16.png", title: "Tranexamic Acid (TXA)", url: null, published: true },
-    { file: "mind-map-17.png", title: "Arterial Line & Pressure Monitoring", url: null, published: true },
-    { file: "mind-map-18.png", title: "Orthopedic Anesthesia", url: null, published: true },
-    { file: "mind-map-19.png", title: "Induction of Anesthesia", url: null, published: true },
-    /* Slot 20 has no artwork yet — publish it once the preview is uploaded. */
-    { file: "mind-map-20.png", title: "Mind Map 20", url: null, published: false },
-    { file: "mind-map-21.png", title: "Norepinephrine", url: null, published: true },
-    { file: "mind-map-22.png", title: "Hydralazine", url: null, published: true },
-    /* Slot 23 is the same Phenylephrine artwork now used by slot 02 — hidden to
-       avoid listing the same map twice. */
-    { file: "mind-map-23.png", title: "Phenylephrine", url: null, published: false },
-    { file: "mind-map-24.png", title: "Neostigmine", url: null, published: true },
-    { file: "mind-map-25.png", title: "Morphine", url: null, published: true },
-    /* Slot 26 duplicates slot 24 (Neostigmine) — hidden. Replace the file, then publish. */
-    { file: "mind-map-26.png", title: "Neostigmine", url: null, published: false },
-    /* Slot 27 duplicates slot 25 (Morphine) — hidden. Replace the file, then publish. */
-    { file: "mind-map-27.png", title: "Morphine", url: null, published: false },
-    { file: "mind-map-28.png", title: "Massive Transfusion Protocol (MTP)", url: null, published: true },
-    { file: "mind-map-29.png", title: "Renal Considerations", url: null, published: true },
-    { file: "mind-map-30.png", title: "Labetalol", url: null, published: true },
-    { file: "mind-map-31.png", title: "Pre-Operative Treatments", url: null, published: true },
-    { file: "mind-map-32.png", title: "Pulmonary Artery Catheter (PAC) & CVP", url: null, published: true },
-    { file: "mind-map-33.png", title: "Anesthesia History", url: null, published: true },
-    { file: "mind-map-34.png", title: "GI Anesthesia", url: null, published: true },
-    { file: "mind-map-35.png", title: "Naloxone (Narcan)", url: null, published: true },
-    { file: "mind-map-36.png", title: "Neuroanesthesia", url: null, published: true },
-    { file: "mind-map-37.png", title: "Pre-Operative Interview", url: null, published: true },
-    { file: "mind-map-38.png", title: "Esmolol", url: null, published: true },
-    { file: "mind-map-39.png", title: "Regional Anesthesia", url: null, published: true },
-    { file: "mind-map-40.png", title: "Restrictive & Obstructive Pulmonary Disease", url: null, published: true },
-    { file: "mind-map-41.png", title: "Pediatric Anesthesia", url: null, published: true },
-    { file: "mind-map-42.png", title: "Anesthesia Overview", url: null, published: true },
-    { file: "mind-map-43.png", title: "Cardiopulmonary Bypass (CPB) & Anesthesia Machine", url: null, published: true },
-    { file: "mind-map-44.png", title: "Hypertension", url: null, published: true },
-    { file: "mind-map-45.png", title: "Anesthesia Instruments", url: null, published: true },
-    { file: "mind-map-46.png", title: "Dopamine", url: null, published: true },
-    /* Slot 47 duplicates slot 46 (Dopamine) — hidden. Replace the file, then publish. */
-    { file: "mind-map-47.png", title: "Dopamine", url: null, published: false },
-    { file: "mind-map-48.png", title: "Vecuronium", url: null, published: true },
-    { file: "mind-map-49.png", title: "Pulmonary Embolism (PE)", url: null, published: true },
-    /* Slot 50 duplicates slot 49 (Pulmonary Embolism) — hidden. Replace the file, then publish. */
-    { file: "mind-map-50.png", title: "Pulmonary Embolism (PE)", url: null, published: false },
-    { file: "mind-map-51.png", title: "Pancuronium", url: null, published: true },
-    { file: "mind-map-52.png", title: "Vasopressin", url: null, published: true },
-    /* Slot 53 duplicates slot 52 (Vasopressin) — hidden. Replace the file, then publish. */
-    { file: "mind-map-53.png", title: "Vasopressin", url: null, published: false },
-    { file: "mind-map-54.png", title: "Hypoxia", url: null, published: true },
-    { file: "mind-map-55.png", title: "Metoprolol", url: null, published: true },
-    { file: "mind-map-56.png", title: "Myocardial Infarction (MI)", url: null, published: true },
-    { file: "mind-map-57.png", title: "Ephedrine", url: null, published: true },
-    /* Overview of every invasive monitor — complements the single-topic maps at
-       slots 06 (CVP), 17 (arterial line), and 32 (PAC). */
-    { file: "mind-map-58.png", title: "Invasive Monitors Overview", url: null, published: true },
-    { file: "mind-map-59.png", title: "Cisatracurium", url: null, published: true },
-    { file: "mind-map-60.png", title: "Scopolamine", url: null, published: true },
-    { file: "mind-map-61.png", title: "Sevoflurane", url: null, published: true },
-    { file: "mind-map-62.png", title: "Nifedipine", url: null, published: true },
-    /* Technique-selection map (GA vs neuraxial vs regional vs MAC) — broader than
-       the induction map at slot 19 and the overview at slot 42. */
-    { file: "mind-map-63.png", title: "Anesthesia Technique Choices", url: null, published: true },
-    { file: "mind-map-64.png", title: "Tocolytics in Obstetric Anesthesia", url: null, published: true },
-    { file: "mind-map-65.png", title: "Aortic Stenosis", url: null, published: true },
-    { file: "mind-map-66.png", title: "Bronchospasm", url: null, published: true },
-    /* Slots 67 and 69 duplicate slot 65 (Aortic Stenosis) — hidden. Replace the files, then publish. */
-    { file: "mind-map-67.png", title: "Aortic Stenosis", url: null, published: false },
-    /* Slot 68 duplicates slot 66 (Bronchospasm) — hidden. Replace the file, then publish. */
-    { file: "mind-map-68.png", title: "Bronchospasm", url: null, published: false },
-    { file: "mind-map-69.png", title: "Aortic Stenosis", url: null, published: false },
-    { file: "mind-map-70.png", title: "Glycopyrrolate (Robinul)", url: null, published: true },
-    { file: "mind-map-71.png", title: "Epinephrine", url: null, published: true },
-    { file: "mind-map-72.png", title: "EKG Interpretation", url: null, published: true },
-    /* Title corrects the artwork, which renders the heading as "ATRICURIUM". */
-    { file: "mind-map-73.png", title: "Atracurium", url: null, published: true },
-    /* Reading and responding to monitor data — distinct from the invasive-monitor
-       hardware overview at slot 58. */
-    { file: "mind-map-74.png", title: "Anesthesia Monitors & Meaning", url: null, published: true },
-    { file: "mind-map-75.png", title: "IV Medication Pharmacokinetics & Pharmacodynamics", url: null, published: true },
-    { file: "mind-map-76.png", title: "Etomidate", url: null, published: true },
-    { file: "mind-map-77.png", title: "Atropine", url: null, published: true },
-    { file: "mind-map-78.png", title: "Hypotension", url: null, published: true },
-    { file: "mind-map-79.png", title: "IV Access & Fluid Management", url: null, published: true },
-    /* Slot 80 duplicates slot 79 (IV Access & Fluid Management) — hidden. Replace the file, then publish. */
-    { file: "mind-map-80.png", title: "IV Access & Fluid Management", url: null, published: false },
-    /* Slots 81–86 arrived after 87–96, so they are listed here to keep the grid in
-       numeric order. */
-    { file: "mind-map-81.png", title: "Anesthesia Gas Laws", url: null, published: true },
-    { file: "mind-map-82.png", title: "Rocuronium", url: null, published: true },
-    /* Foundations chart from the "Assess the…" series — a different chart from the
-       formal overview at slot 42, which is organized by perioperative phase. */
-    { file: "mind-map-83.png", title: "Anesthesia Basics", url: null, published: true },
-    { file: "mind-map-84.png", title: "Mechanical Ventilator Modes & Settings", url: null, published: true },
-    /* Slot 85 duplicates slot 84 (Mechanical Ventilator Modes & Settings) — hidden.
-       Replace the file, then publish. */
-    { file: "mind-map-85.png", title: "Mechanical Ventilator Modes & Settings", url: null, published: false },
-    { file: "mind-map-86.png", title: "Cardiac Considerations", url: null, published: true },
-    { file: "mind-map-87.png", title: "Midazolam (Versed)", url: null, published: true },
-    { file: "mind-map-88.png", title: "Stroke", url: null, published: true },
-    { file: "mind-map-89.png", title: "Dexmedetomidine (Precedex)", url: null, published: true },
-    /* Comparison of all five inotropes — complements the single-drug maps at slots
-       15 (dobutamine), 21 (norepinephrine), 46 (dopamine), and 71 (epinephrine). */
-    { file: "mind-map-90.png", title: "Inotropes Compared", url: null, published: true },
-    /* Slot 91 duplicates slot 90 (Inotropes Compared) — hidden. Replace the file, then publish. */
-    { file: "mind-map-91.png", title: "Inotropes Compared", url: null, published: false },
-    /* Same subject as slot 37 but a different chart, built around the A-I-D-E-A-L
-       mnemonic. Titled to tell the two apart on the shelf. */
-    { file: "mind-map-92.png", title: "Pre-Operative Interview (A-I-D-E-A-L Framework)", url: null, published: true },
-    { file: "mind-map-93.png", title: "Hepatic Considerations", url: null, published: true },
-    /* Slot 94 duplicates slot 92 (Pre-Operative Interview) — hidden. Replace the file, then publish. */
-    { file: "mind-map-94.png", title: "Pre-Operative Interview (A-I-D-E-A-L Framework)", url: null, published: false },
-    /* Second etomidate map; slot 76 is the live one. Their induction dose ranges
-       disagree (0.15–0.3 vs 0.2–0.3 mg/kg), so only one should ever be published. */
-    { file: "mind-map-95.png", title: "Etomidate", url: null, published: false },
-    { file: "mind-map-96.png", title: "Isoflurane", url: null, published: true },
-    { file: "mind-map-97.png", title: "Endocrine Considerations", url: null, published: true },
-    { file: "mind-map-98.png", title: "Hydromorphone (Dilaudid)", url: null, published: true },
-    { file: "mind-map-99.png", title: "Patient Positioning", url: null, published: true },
-    { file: "mind-map-100.png", title: "Airway Management", url: null, published: true },
-    /* Inhaled counterpart to the IV pharmacokinetics map at slot 75. */
-    { file: "mind-map-101.png", title: "Inhalational Agent Pharmacokinetics & Pharmacodynamics", url: null, published: true },
-    /* Slot 102 duplicates slot 101 (Inhalational Agent PK/PD) — hidden. Replace the
-       file, then publish. */
-    { file: "mind-map-102.png", title: "Inhalational Agent Pharmacokinetics & Pharmacodynamics", url: null, published: false },
-    /* Machine itself, from the "Assess the…" series. Slot 43 covers the machine only in
-       the context of cardiopulmonary bypass; slot 45 is the instrument tray. */
-    { file: "mind-map-103.png", title: "Anesthesia Machine", url: null, published: true },
-    /* Counterpart to the induction map at slot 19. */
-    { file: "mind-map-104.png", title: "Emergence of Anesthesia", url: null, published: true },
-    /* Covers AS, AR, MS and MR side by side. Slot 65 is a deep dive on aortic stenosis
-       alone, so the two complement each other. */
-    { file: "mind-map-105.png", title: "Cardiac Valvular Disease", url: null, published: true },
-    { file: "mind-map-106.png", title: "Fentanyl", url: null, published: true },
-    /* Slot 107 duplicates slot 104 (Emergence of Anesthesia) — hidden. Replace the
-       file, then publish. */
-    { file: "mind-map-107.png", title: "Emergence of Anesthesia", url: null, published: false },
-    { file: "mind-map-108.png", title: "Propofol", url: null, published: true },
-    /* Slots 109–114 all repeat maps that are already on sale, so they are hidden:
-       109 repeats slot 56, 110 repeats slot 108, 111 and 114 repeat slot 61,
-       112 repeats slot 10, and 113 repeats slot 89. Their content matches the live
-       versions, so nothing is being withheld from the shelf. Replace any of these
-       files with new artwork, then publish that slot. */
-    { file: "mind-map-109.png", title: "Myocardial Infarction (MI)", url: null, published: false },
-    { file: "mind-map-110.png", title: "Propofol", url: null, published: false },
-    { file: "mind-map-111.png", title: "Sevoflurane", url: null, published: false },
-    { file: "mind-map-112.png", title: "Desflurane", url: null, published: false },
-    { file: "mind-map-113.png", title: "Dexmedetomidine (Precedex)", url: null, published: false },
-    { file: "mind-map-114.png", title: "Sevoflurane", url: null, published: false },
-    /* Slots 115–126 are all re-exports of maps already on sale, so the whole batch is
-       hidden: 115 repeats slot 40, 116 repeats slot 3, 117 repeats slot 34, 118 repeats
-       slot 70, 119 repeats slot 96, 120 repeats slot 5, 121 repeats slot 63, 122 and 123
-       repeat slot 18, 124 repeats slot 11, 125 repeats slot 25, and 126 repeats slot 76.
-       Every pair was compared image by image — they are byte-different but visually the
-       same chart, so a hash comparison does not catch them. Replace any of these files
-       with new artwork, then publish that slot. */
-    { file: "mind-map-115.png", title: "Restrictive & Obstructive Pulmonary Disease", url: null, published: false },
-    { file: "mind-map-116.png", title: "Nitrous Oxide (N₂O)", url: null, published: false },
-    { file: "mind-map-117.png", title: "GI Anesthesia", url: null, published: false },
-    { file: "mind-map-118.png", title: "Glycopyrrolate (Robinul)", url: null, published: false },
-    { file: "mind-map-119.png", title: "Isoflurane", url: null, published: false },
-    { file: "mind-map-120.png", title: "ACLS Recognition & Treatment", url: null, published: false },
-    { file: "mind-map-121.png", title: "Anesthesia Technique Choices", url: null, published: false },
-    { file: "mind-map-122.png", title: "Orthopedic Anesthesia", url: null, published: false },
-    { file: "mind-map-123.png", title: "Orthopedic Anesthesia", url: null, published: false },
-    { file: "mind-map-124.png", title: "ENT Anesthesia", url: null, published: false },
-    { file: "mind-map-125.png", title: "Morphine", url: null, published: false },
-    /* Third etomidate export. Its induction dose (0.2–0.3 mg/kg) matches hidden slot 95
-       and disagrees with live slot 76 (0.15–0.3 mg/kg) — see the note above slot 95.
-       Two of the three exports now say 0.2–0.3. */
-    { file: "mind-map-126.png", title: "Etomidate", url: null, published: false }
-  ];
-
-  /* ---------------------------------------------------------------- */
-
-  var catalog = MAPS.filter(function (m) { return m.published !== false; });
+  var catalog = [];
+  var pricing = { unitAmount: 200, bundleSize: 5, bundleAmount: 900 };
+  var checkoutEnabled = false;
   var selected = [];
+  var busy = false;
 
-  function money(n) {
-    return "$" + n.toFixed(2);
+  function money(cents) {
+    return "$" + (cents / 100).toFixed(2);
   }
 
-  /* Bundle pricing: every complete group of 5 costs $9.00, the rest are $2.00 each. */
+  /* Every complete group of five costs the bundle price, the rest are singles. */
   function priceFor(count) {
-    var bundles = Math.floor(count / BUNDLE_SIZE);
-    var singles = count % BUNDLE_SIZE;
-    return bundles * BUNDLE_PRICE + singles * PRICE_SINGLE;
+    var bundles = Math.floor(count / pricing.bundleSize);
+    var singles = count % pricing.bundleSize;
+    return bundles * pricing.bundleAmount + singles * pricing.unitAmount;
   }
 
   /* Netlify Image CDN keeps previews small and fast, and serves WebP/AVIF automatically. */
@@ -723,14 +544,80 @@
            "&w=600&h=450&fit=cover&q=60";
   }
 
+  function notice(html) {
+    var el = document.getElementById("notice");
+    if (!html) {
+      el.hidden = true;
+      return;
+    }
+    el.innerHTML = html;
+    el.hidden = false;
+  }
+
+  function etsyFallback(lead) {
+    return lead + " You can still buy every map on our " +
+           '<a href="' + SHOP_URL + '" target="_blank" rel="noopener">Etsy shop</a>, ' +
+           'or email <a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a>.';
+  }
+
+  /* One place decides what a buy button does, so the page behaves the same way
+     whether payments are switched on or not. */
+  function buyButton(ids, label) {
+    if (!checkoutEnabled) {
+      var link = document.createElement("a");
+      link.className = "btn primary";
+      link.href = SHOP_URL;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = label;
+      return link;
+    }
+
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn primary";
+    button.textContent = label;
+    button.addEventListener("click", function () {
+      startCheckout(typeof ids === "function" ? ids() : ids, button, label);
+    });
+    return button;
+  }
+
+  function startCheckout(ids, button, label) {
+    if (busy || !ids.length) return;
+    busy = true;
+    button.disabled = true;
+    button.textContent = "Starting checkout…";
+    notice("");
+
+    fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: ids, cancelTo: "mind-maps" })
+    })
+      .then(function (response) {
+        return response.json().then(function (data) {
+          if (!response.ok || !data.url) throw new Error(data.message || "Checkout could not be started.");
+          window.location.href = data.url;
+        });
+      })
+      .catch(function (error) {
+        busy = false;
+        button.disabled = false;
+        button.textContent = label;
+        notice(etsyFallback(error.message));
+        document.getElementById("notice").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+  }
+
   function render() {
     var grid = document.getElementById("maps");
     grid.innerHTML = "";
 
-    catalog.forEach(function (map, i) {
+    catalog.forEach(function (map) {
       var card = document.createElement("article");
       card.className = "map";
-      card.setAttribute("data-index", i);
+      card.setAttribute("data-id", map.id);
 
       var thumb = document.createElement("div");
       thumb.className = "thumb";
@@ -758,7 +645,8 @@
 
       var price = document.createElement("div");
       price.className = "map-price";
-      price.textContent = money(PRICE_SINGLE) + " · or 5 for " + money(BUNDLE_PRICE);
+      price.textContent = money(pricing.unitAmount) + " · or " + pricing.bundleSize +
+                          " for " + money(pricing.bundleAmount);
 
       var actions = document.createElement("div");
       actions.className = "map-actions";
@@ -769,18 +657,11 @@
       add.textContent = "Add to bundle";
       add.setAttribute("aria-pressed", "false");
       add.addEventListener("click", function () {
-        toggle(i, card, add);
+        toggle(map.id, card, add);
       });
 
-      var buy = document.createElement("a");
-      buy.className = "btn primary";
-      buy.href = map.url || SHOP_URL;
-      buy.target = "_blank";
-      buy.rel = "noopener";
-      buy.textContent = "Buy " + money(PRICE_SINGLE);
-
       actions.appendChild(add);
-      actions.appendChild(buy);
+      actions.appendChild(buyButton([map.id], "Buy " + money(pricing.unitAmount)));
       body.appendChild(h3);
       body.appendChild(price);
       body.appendChild(actions);
@@ -790,11 +671,11 @@
     });
   }
 
-  function toggle(index, card, button) {
-    var at = selected.indexOf(index);
+  function toggle(id, card, button) {
+    var at = selected.indexOf(id);
 
     if (at === -1) {
-      selected.push(index);
+      selected.push(id);
       card.classList.add("selected");
       button.textContent = "Remove";
       button.setAttribute("aria-pressed", "true");
@@ -818,27 +699,25 @@
     }
 
     var total = priceFor(count);
-    var full = count * PRICE_SINGLE;
+    var full = count * pricing.unitAmount;
     var saved = full - total;
-    var toNext = (BUNDLE_SIZE - (count % BUNDLE_SIZE)) % BUNDLE_SIZE;
+    var toNext = (pricing.bundleSize - (count % pricing.bundleSize)) % pricing.bundleSize;
 
     var detail = count + (count === 1 ? " map selected" : " maps selected");
     if (saved > 0) {
       detail += " · saving " + money(saved);
     }
     if (toNext > 0) {
-      detail += " · add " + toNext + " more for the " + money(BUNDLE_PRICE) + " bundle";
+      detail += " · add " + toNext + " more for the " + money(pricing.bundleAmount) + " bundle";
     }
 
     document.getElementById("summary-total").textContent = money(total);
     document.getElementById("summary-detail").textContent = detail;
 
-    /* Titles travel to the store so the buyer knows which maps they picked. */
-    var titles = selected.map(function (i) { return catalog[i].title; }).join(", ");
-    var link = document.getElementById("checkout-link");
-    link.href = SHOP_URL;
-    link.textContent = "Checkout " + money(total);
-    link.title = "Selected: " + titles;
+    var button = document.getElementById("checkout-link");
+    if (!busy) {
+      button.textContent = checkoutEnabled ? "Checkout " + money(total) : "Buy on Etsy";
+    }
 
     bar.classList.add("visible");
   }
@@ -854,12 +733,43 @@
     updateSummary();
   }
 
-  render();
+  document.getElementById("checkout-link").addEventListener("click", function () {
+    if (!checkoutEnabled) {
+      window.open(SHOP_URL, "_blank", "noopener");
+      return;
+    }
+    startCheckout(selected.slice(), this, "Checkout " + money(priceFor(selected.length)));
+  });
+
   document.getElementById("clear-bundle").addEventListener("click", clearBundle);
   document.querySelector("[data-bundle-jump]").addEventListener("click", function () {
     document.getElementById("maps").scrollIntoView({ behavior: "smooth", block: "start" });
   });
   document.getElementById("year").textContent = new Date().getFullYear();
+
+  fetch("/api/mind-maps")
+    .then(function (response) {
+      if (!response.ok) throw new Error("The mind map collection could not be loaded.");
+      return response.json();
+    })
+    .then(function (data) {
+      catalog = data.maps || [];
+      pricing = {
+        unitAmount: data.unitAmount,
+        bundleSize: data.bundleSize,
+        bundleAmount: data.bundleAmount
+      };
+      checkoutEnabled = data.checkoutEnabled === true;
+
+      if (!checkoutEnabled) {
+        notice(etsyFallback("Card payment on this site is being switched on."));
+      }
+
+      render();
+    })
+    .catch(function (error) {
+      notice(etsyFallback(error.message));
+    });
 </script>
 
 </body>

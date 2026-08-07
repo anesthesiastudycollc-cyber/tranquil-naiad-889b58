@@ -9,15 +9,18 @@ No frontend framework and no bundler for the pages themselves.
 /
 ├── index.html                      # Landing page
 ├── store.html                      # Digital store (renders itself from /api/catalog)
+├── mind-maps.html                  # Mind map collection (renders itself from /api/mind-maps)
 ├── thank-you.html                  # Post-payment instant downloads
 ├── privacy.html                    # Privacy policy (Apple App Store support URL)
+├── MIND-MAPS-SETUP.md              # Plain-language setup guide written for the shop owner
 ├── netlify/
 │   ├── lib/
 │   │   ├── catalog.ts              # SOURCE OF TRUTH for products and prices
+│   │   ├── mind-maps.ts            # SOURCE OF TRUTH for the individual mind maps
 │   │   ├── stripe.ts               # Stripe client + not-configured handling
 │   │   ├── tokens.ts               # HMAC-signed download links
 │   │   └── fulfilment.ts           # Resolves a paid Stripe session to catalog items
-│   ├── functions/                  # catalog, checkout, order, download
+│   ├── functions/                  # catalog, mind-maps, mind-maps-export, checkout, order, download
 │   └── database/migrations/        # Applied automatically by Netlify at deploy
 ├── db/                             # Drizzle schema + client for the order ledger
 ├── netlify.toml
@@ -30,9 +33,9 @@ No frontend framework and no bundler for the pages themselves.
 - Page styles are **inline `<style>` blocks** inside each HTML file — no external CSS files.
 - CSS custom properties (`--cyan`, `--purple`, `--card`, etc.) are re-declared in `:root` per page.
   Each file stays self-contained rather than sharing a stylesheet.
-- Page JavaScript is inline, vanilla, and dependency-free. `store.html` and `thank-you.html` carry
-  real logic (cart, checkout, download rendering); `index.html` and `privacy.html` have only the
-  footer-year script.
+- Page JavaScript is inline, vanilla, and dependency-free. `store.html`, `mind-maps.html`, and
+  `thank-you.html` carry real logic (cart, checkout, download rendering); `index.html` and
+  `privacy.html` have only the footer-year script.
 - Functions are `.mts` with in-code `config.path` routing under `/api/*`. Shared helpers live in
   `netlify/lib/*.ts` and are imported with a `.js` extension (`../lib/catalog.js`).
 - Placeholder social links are rendered as `<span class="btn soon">` elements — swap to `<a>` tags
@@ -43,10 +46,22 @@ No frontend framework and no bundler for the pages themselves.
 - **Keep dependencies few and deliberate.** The site was originally dependency-free; npm exists now
   only because payments and digital delivery require it (Stripe, Netlify Blobs, Netlify Database).
   Hold that line — no bundlers, no CDN scripts, no UI libraries.
-- **Prices live only in `netlify/lib/catalog.ts`.** The browser posts product **ids** to
-  `/api/checkout`; the server looks each one up and builds the Stripe line items. Never accept a
-  price, name, or quantity from the client — that is the whole reason the storefront fetches
-  `/api/catalog` instead of hardcoding products in HTML.
+- **Prices live only in `netlify/lib/catalog.ts` and `netlify/lib/mind-maps.ts`.** The browser posts
+  product **ids** to `/api/checkout`; the server looks each one up and builds the Stripe line items.
+  Never accept a price, name, or quantity from the client — that is the whole reason the storefront
+  fetches `/api/catalog` and the mind map page fetches `/api/mind-maps` instead of hardcoding
+  products in HTML.
+- **Mind maps are catalog products that skip the catalog listing.** `mind-maps.ts` products resolve
+  through `getProduct()` so checkout, fulfilment, and download treat them normally, but they are
+  excluded from `publicCatalog()` — 89 two-dollar items would bury the study guides on `store.html`.
+- **The 5-for-$9 mind map saving is applied as a Stripe discount, not a bundle line item.** Each map
+  stays its own $2 line so a paid line always names exactly one product, which is what fulfilment
+  reads to decide download entitlement. A bundle line item would cover five products at once and
+  break that mapping. Stripe rejects `discounts` alongside `allow_promotion_codes`, so the automatic
+  saving takes precedence over promo codes when it applies.
+- **Shopify and Etsy are synced by export file, not by API.** `/api/mind-maps-export` generates
+  upload sheets from the same list the site sells from. A live sync would need per-marketplace app
+  credentials and would rewrite live listings unattended — deliberately not done.
 - **Stripe is the authority on entitlement, not the database.** `/api/download` re-retrieves the
   Checkout session and confirms it paid for that exact product. The `orders` table is a ledger for
   bookkeeping only, and its write in `/api/order` is deliberately best-effort inside a `try/catch`
