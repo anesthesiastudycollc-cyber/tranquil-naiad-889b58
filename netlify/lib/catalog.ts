@@ -10,6 +10,8 @@
  * `GET /api/catalog`, so no HTML needs touching.
  */
 
+import { MIND_MAP_PRODUCTS } from "./mind-maps.js";
+
 export type Category = {
   id: string;
   name: string;
@@ -422,8 +424,16 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
+/**
+ * Individual mind maps live in `mind-maps.ts` and are browsed on their own page,
+ * so they are resolvable for checkout and download without appearing in the
+ * store listing — see the note at the top of that file.
+ */
 export function getProduct(id: string): Product | undefined {
-  return PRODUCTS.find((product) => product.id === id);
+  return (
+    PRODUCTS.find((product) => product.id === id) ??
+    MIND_MAP_PRODUCTS.find((product) => product.id === id)
+  );
 }
 
 /** The catalog shape sent to the browser — delivery details stay server-side. */

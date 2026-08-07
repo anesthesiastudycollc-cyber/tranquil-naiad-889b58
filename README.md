@@ -6,10 +6,16 @@ A marketing website and digital storefront for **Anesthesia Study Co. LLC**, an 
 
 - **index.html** — Landing page with hero, purchase buttons, app overview, marketplace links, social, about, and support sections
 - **store.html** — Digital store: pick study guides, one-pagers, mind maps, interactive apps, or bundles and pay by card
+- **mind-maps.html** — The individual mind map collection: browse previews, buy one for $2.00 or any five for $9.00, and pay by card on site
 - **thank-you.html** — Post-payment page that unlocks every purchased file immediately
 - **privacy.html** — Privacy policy page (required for the Apple App Store support URL)
-- **netlify/functions/** — Catalog, checkout, order-fulfilment, and file-download endpoints
+- **netlify/functions/** — Catalog, mind maps, channel export, checkout, order-fulfilment, and file-download endpoints
 - **db/** — Drizzle schema for the order ledger (Netlify Database / Postgres)
+
+New to the setup? **[STRIPE-SETUP.md](STRIPE-SETUP.md)** switches on card payments step by step,
+and **[MIND-MAPS-SETUP.md](MIND-MAPS-SETUP.md)** covers uploading files, testing a purchase, and
+syncing Shopify and Etsy — both written in plain language. Once deployed,
+`/api/setup-check` reports what is and is not configured without revealing any key.
 
 ## Key Technologies
 
@@ -45,6 +51,10 @@ netlify env:set DOWNLOAD_SIGNING_SECRET "$(openssl rand -hex 32)"
 
 Use a `sk_test_...` key plus Stripe's test cards to trial the whole flow before going live.
 
+Visit `/api/setup-check` after deploying to confirm the configuration: it asks Stripe whether the
+key actually authenticates, whether the account can take live charges, and which product files are
+still missing from the blob store. It never renders a key or any part of one.
+
 ### 2. Upload the product files
 
 Each catalog entry names a `blobKey`. Upload the matching file to the `digital-products` blob store:
@@ -55,6 +65,10 @@ netlify blobs:set digital-products onepager-induction.pdf --input ./files/induct
 netlify blobs:set digital-products mindmap-airway.pdf --input ./files/airway-map.pdf
 netlify blobs:set digital-products app-planning-workbook.html --input ./files/workbook.html
 # ...one per product
+
+# Individual mind maps use their preview file name as the key
+netlify blobs:set digital-products mind-map-02.png --input ./files/phenylephrine-full.png
+
 netlify blobs:list digital-products     # verify
 ```
 
@@ -71,7 +85,13 @@ on digital goods (this is not configured in code).
 `netlify/lib/catalog.ts` is the single source of truth for products, prices, descriptions, and
 categories. Change it and the storefront updates itself — no HTML edits needed.
 
-Prices are **only** read from this file, server-side. The browser sends product ids to
+`netlify/lib/mind-maps.ts` is the equivalent for the individual mind maps sold on
+`mind-maps.html`. They are deliberately excluded from `/api/catalog` — nearly a hundred $2 items
+would bury the study guides on `store.html` — but they are ordinary catalog products otherwise, so
+checkout, fulfilment, and download treat them identically. Set `published: false` to withdraw a map
+from sale.
+
+Prices are **only** read from these files, server-side. The browser sends product ids to
 `/api/checkout` and never a price, so a tampered request cannot change what is charged.
 
 To add a product: append an entry to `PRODUCTS`, then upload its file under the `blobKey` you chose.
@@ -107,3 +127,15 @@ apply them by hand.
 Etsy, Shopify, and Amazon listings are linked from the landing page. Placeholder social links are
 rendered as `<span class="btn soon">` elements — swap them to `<a>` tags once the Facebook, TikTok,
 and Pinterest profiles exist.
+
+## Keeping Shopify and Etsy in Step
+
+`/api/mind-maps-export?format=shopify` returns a Shopify product import CSV and
+`?format=etsy` returns a listing worksheet, both generated from `netlify/lib/mind-maps.ts`. Edit
+that list, re-export, and upload — the three channels describe the same maps at the same price
+because they share one source.
+
+There is no live API sync on purpose. Shopify and Etsy each require their own app credentials, and
+a background job that silently rewrites live listings is a far larger commitment than a file the
+shop owner reviews before uploading. The export image column points at the watermarked previews
+this site serves; swap in the full-resolution artwork on each channel.
