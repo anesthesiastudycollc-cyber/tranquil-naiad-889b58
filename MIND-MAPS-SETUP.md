@@ -12,50 +12,19 @@ works, but the buy buttons send people to Etsy instead.
 
 ## Step 1 — Turn on card payments
 
-You only ever do this once.
+Card payments are set up once, in Stripe and Netlify. Those steps now live in their
+own guide so there is only one copy to keep correct:
 
-### 1a. Get your Stripe key
+**→ See [STRIPE-SETUP.md](STRIPE-SETUP.md)**
 
-1. Go to **https://dashboard.stripe.com** and sign in.
-2. Top right, make sure the switch says **Test mode** for now. (You will switch to
-   live later, after testing.)
-3. In the left menu click **Developers**, then **API keys**.
-4. Find the row called **Secret key**. Click **Reveal test key**.
-5. Copy it. It starts with `sk_test_`.
+It covers creating the Stripe account, adding the two settings, testing with a fake
+card, and switching to real money. Come back here afterwards for Step 2.
 
-> Never paste this key into an email, a web page, or a chat. It is the key to your
-> money. It only ever goes in the box described below.
-
-### 1b. Put the key into Netlify
-
-1. Go to **https://app.netlify.com** and sign in.
-2. Click your site (**tranquil-naiad-889b58**, or your custom domain name).
-3. In the left menu click **Site configuration**.
-4. Click **Environment variables**.
-5. Click the **Add a variable** button, then **Add a single variable**.
-6. In the **Key** box type exactly: `STRIPE_SECRET_KEY`
-7. In the **Value** box paste the key you copied from Stripe.
-8. Set scope to **All scopes** if it asks. Click **Create variable**.
-
-### 1c. Add the download-link key
-
-This one protects your download links so people cannot share them forever.
-
-1. Still on the Environment variables page, click **Add a variable** again.
-2. **Key**: `DOWNLOAD_SIGNING_SECRET`
-3. **Value**: any long random jumble of letters and numbers you make up — at least
-   40 characters. Mash the keyboard. You never need to remember it.
-4. Click **Create variable**.
-
-### 1d. Republish
-
-1. In the left menu click **Deploys**.
-2. Click **Trigger deploy**, then **Deploy site**.
-3. Wait for the green **Published** label (usually about a minute).
-
-**How to tell it worked:** open your mind maps page. The yellow message at the top
-that said card payment is being switched on should be gone, and the buttons should
-say **Buy $2.00** instead of sending you to Etsy.
+**How to tell it worked:** open your mind maps page. The yellow message saying card
+payment is being switched on should be gone, and the buttons should say **Buy $2.00**
+instead of sending you to Etsy. You can also open
+**https://anesthesiastudyco.com/api/setup-check** at any time for a plain checklist of
+what is and is not configured.
 
 ---
 
@@ -120,16 +89,9 @@ Do this while still in Stripe **Test mode**, so no real money moves.
 6. You should land on the thank-you page with a download button for each of the
    five maps. Click one and check the file that downloads is the full-quality one.
 
-**When that works, go live:**
-
-1. In Stripe, flip the top-right switch from **Test mode** to **Live mode**.
-2. Go to **Developers → API keys** again and reveal the **live** secret key. It
-   starts with `sk_live_`.
-3. In Netlify, go back to **Site configuration → Environment variables**, click on
-   `STRIPE_SECRET_KEY`, and replace the value with the live key.
-4. Trigger a deploy again (Step 1d).
-
-You are now taking real payments on your own website.
+**When that works, go live:** follow Part 7 of [STRIPE-SETUP.md](STRIPE-SETUP.md).
+It swaps your test key for the live one and confirms Stripe has finished approving
+your account, which it must do before real payments will go through.
 
 ---
 
@@ -209,8 +171,8 @@ export const MIND_MAP_BUNDLE_AMOUNT = 900;
 
 | What you see | What it means | What to do |
 | --- | --- | --- |
-| Yellow message: "Card payment on this site is being switched on" | `STRIPE_SECRET_KEY` is missing or the site has not been redeployed | Redo Step 1 |
-| Buy buttons open Etsy instead of a payment page | Same as above | Redo Step 1 |
+| Yellow message: "Card payment on this site is being switched on" | `STRIPE_SECRET_KEY` is missing or the site has not been redeployed | Open `/api/setup-check`, then see [STRIPE-SETUP.md](STRIPE-SETUP.md) |
+| Buy buttons open Etsy instead of a payment page | Same as above | Open `/api/setup-check`, then see [STRIPE-SETUP.md](STRIPE-SETUP.md) |
 | "Preview image coming soon" on a card | The preview file is missing from `assets/mind-maps/` | Upload the preview image with the exact file name |
 | Customer says the download says "File not available yet" | You have not uploaded that map's full file yet | Do Step 2 for that map, then email them the file |
 | Bottom bar shows $10.00 for five maps | You are looking at an old cached page | Refresh the page with Ctrl+R (or Cmd+R) |

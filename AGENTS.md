@@ -12,6 +12,7 @@ No frontend framework and no bundler for the pages themselves.
 ├── mind-maps.html                  # Mind map collection (renders itself from /api/mind-maps)
 ├── thank-you.html                  # Post-payment instant downloads
 ├── privacy.html                    # Privacy policy (Apple App Store support URL)
+├── STRIPE-SETUP.md                 # Plain-language payment setup guide for the shop owner
 ├── MIND-MAPS-SETUP.md              # Plain-language setup guide written for the shop owner
 ├── netlify/
 │   ├── lib/
@@ -20,7 +21,8 @@ No frontend framework and no bundler for the pages themselves.
 │   │   ├── stripe.ts               # Stripe client + not-configured handling
 │   │   ├── tokens.ts               # HMAC-signed download links
 │   │   └── fulfilment.ts           # Resolves a paid Stripe session to catalog items
-│   ├── functions/                  # catalog, mind-maps, mind-maps-export, checkout, order, download
+│   ├── functions/                  # catalog, mind-maps, mind-maps-export, checkout, order,
+│   │                               #   download, setup-check
 │   └── database/migrations/        # Applied automatically by Netlify at deploy
 ├── db/                             # Drizzle schema + client for the order ledger
 ├── netlify.toml
@@ -69,6 +71,9 @@ No frontend framework and no bundler for the pages themselves.
 - **Download links are stateless HMAC tokens** (30-day expiry), so there is no session store to
   maintain. `DOWNLOAD_SIGNING_SECRET` should be set explicitly; the fallback derives a key from
   `STRIPE_SECRET_KEY`, which couples link validity to Stripe key rotation.
+- **`/api/setup-check` is the owner-facing configuration report** — it verifies the Stripe key by
+  calling Stripe rather than by checking the variable exists, and lists product files still missing
+  from Blobs. It is unlinked from the site nav and must never render a key or any part of one.
 - **The store degrades gracefully.** Without `STRIPE_SECRET_KEY` the catalog still renders and the
   page explains that card checkout is off, pointing customers at Etsy and email. Endpoints return
   503 with an actionable message rather than throwing.

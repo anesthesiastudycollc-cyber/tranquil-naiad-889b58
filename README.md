@@ -12,8 +12,10 @@ A marketing website and digital storefront for **Anesthesia Study Co. LLC**, an 
 - **netlify/functions/** — Catalog, mind maps, channel export, checkout, order-fulfilment, and file-download endpoints
 - **db/** — Drizzle schema for the order ledger (Netlify Database / Postgres)
 
-New to the setup? **[MIND-MAPS-SETUP.md](MIND-MAPS-SETUP.md)** walks through switching on
-payments, uploading files, testing a purchase, and syncing Shopify and Etsy in plain language.
+New to the setup? **[STRIPE-SETUP.md](STRIPE-SETUP.md)** switches on card payments step by step,
+and **[MIND-MAPS-SETUP.md](MIND-MAPS-SETUP.md)** covers uploading files, testing a purchase, and
+syncing Shopify and Etsy — both written in plain language. Once deployed,
+`/api/setup-check` reports what is and is not configured without revealing any key.
 
 ## Key Technologies
 
@@ -48,6 +50,10 @@ netlify env:set DOWNLOAD_SIGNING_SECRET "$(openssl rand -hex 32)"
 ```
 
 Use a `sk_test_...` key plus Stripe's test cards to trial the whole flow before going live.
+
+Visit `/api/setup-check` after deploying to confirm the configuration: it asks Stripe whether the
+key actually authenticates, whether the account can take live charges, and which product files are
+still missing from the blob store. It never renders a key or any part of one.
 
 ### 2. Upload the product files
 
