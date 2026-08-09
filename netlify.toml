@@ -1,5 +1,9 @@
 [build]
   publish = "."
+  # Replaces the mind map artwork with blurred, watermarked previews before the
+  # site is deployed. The originals stay untouched in git; only the protected
+  # versions are ever published. See scripts/build-previews.mjs.
+  command = "npm run previews:deploy"
 
 [functions]
   directory = "netlify/functions"
