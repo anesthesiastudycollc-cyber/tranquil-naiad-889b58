@@ -6,3 +6,6 @@ node_modules/
 .netlify/
 deno.lock
 preview-exports/
+# Generated at deploy time by scripts/build-previews.mjs. If a local --force run
+# leaves it behind, an untracked directory here would trip the git safety check.
+assets/mind-maps/listing/

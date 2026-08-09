@@ -15,11 +15,13 @@ import { siteOrigin } from "../lib/stripe.js";
  *   GET /api/mind-maps-export?format=shopify  → Shopify product import CSV
  *   GET /api/mind-maps-export?format=etsy     → listing worksheet for Etsy
  *
- * The image column points at the watermarked previews this site serves. Those are
- * the right pictures for a listing gallery, and deliberately so: the previews are
- * blurred and stamped at deploy time, so a shopper browsing Etsy or Shopify can
- * see the topic without being handed the artwork. The clean full-resolution file
- * belongs in each marketplace's digital-delivery slot, never in its photo gallery.
+ * The image column points at the square listing crops this site serves from
+ * `/assets/mind-maps/listing/`. Those are the right pictures for a marketplace
+ * gallery, and deliberately so: they are blurred, stamped, and cropped to the
+ * middle of the map at deploy time, so a shopper browsing Etsy or Shopify sees
+ * the subject and the style without being shown how the whole layout is
+ * arranged — which is the thing being sold. The clean full-resolution file
+ * belongs in each marketplace's digital-delivery slot, never in its gallery.
  */
 export default async (req: Request) => {
   const format = new URL(req.url).searchParams.get("format") ?? "shopify";
@@ -44,6 +46,16 @@ export default async (req: Request) => {
 };
 
 const PRICE = (MIND_MAP_UNIT_AMOUNT / 100).toFixed(2);
+
+/**
+ * The marketplace listing photo: a square, blurred, watermarked crop of the
+ * middle of the map, written to `listing/` by `scripts/build-previews.mjs`.
+ * Deliberately not the gallery preview at `/assets/mind-maps/<file>` — that one
+ * is the full landscape, which shows a shopper the entire layout for free.
+ */
+function listingImage(origin: string, file: string): string {
+  return `${origin}/assets/mind-maps/listing/${file}`;
+}
 
 function description(title: string): string {
   return (
@@ -96,7 +108,7 @@ function shopifyCsv(origin: string): string {
     // Digital delivery: no shipping is ever calculated for these.
     "FALSE",
     "TRUE",
-    `${origin}/assets/mind-maps/${map.file}`,
+    listingImage(origin, map.file),
     "1",
     `${map.title} anesthesia mind map`,
     "FALSE",
@@ -138,7 +150,7 @@ function etsyCsv(origin: string): string {
     "I did",
     "Made to order",
     map.file,
-    `${origin}/assets/mind-maps/${map.file}`,
+    listingImage(origin, map.file),
   ]);
 
   return toCsv(columns, rows);

@@ -63,6 +63,13 @@ No frontend framework and no bundler for the pages themselves.
   hand-coded bitmap font (`scripts/font5x7.mjs`) rather than a typeface, because a build machine
   with no fonts installed would silently render a blank watermark and publish naked artwork.
   `--deploy` refuses to run unless git holds a clean copy of the artwork it is about to overwrite.
+- **The marketplace listing photo is a square crop of the middle of the map**, written to
+  `assets/mind-maps/listing/` by the same script and pointed at by the `Image Src` / `Image URL`
+  columns of `/api/mind-maps-export`. Blur hides the fine print, but a full-frame photo still gives
+  away the layout, which is the thing being sold. Blur sigma is scaled by magnification
+  (`blurFor()`), so the crop is no more legible than the wide preview despite being enlarged. The
+  gallery on `mind-maps.html` deliberately keeps the wide variant — a shopper on our own site has
+  already found the product page and needs to see what shape the map is.
 - **Prices live only in `netlify/lib/catalog.ts` and `netlify/lib/mind-maps.ts`.** The browser posts
   product **ids** to `/api/checkout`; the server looks each one up and builds the Stripe line items.
   Never accept a price, name, or quantity from the client — that is the whole reason the storefront
@@ -78,7 +85,9 @@ No frontend framework and no bundler for the pages themselves.
   saving takes precedence over promo codes when it applies.
 - **Shopify and Etsy are synced by export file, not by API.** `/api/mind-maps-export` generates
   upload sheets from the same list the site sells from. A live sync would need per-marketplace app
-  credentials and would rewrite live listings unattended — deliberately not done.
+  credentials and would rewrite live listings unattended — deliberately not done. It also means
+  listings already published on a marketplace keep whichever photo was uploaded at the time —
+  nothing in this repo can retroactively protect them; the shop owner has to replace the photo.
 - **Stripe is the authority on entitlement, not the database.** `/api/download` re-retrieves the
   Checkout session and confirms it paid for that exact product. The `orders` table is a ledger for
   bookkeeping only, and its write in `/api/order` is deliberately best-effort inside a `try/catch`

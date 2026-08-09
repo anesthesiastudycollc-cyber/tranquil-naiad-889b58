@@ -55,11 +55,23 @@ import { renderText } from "./font5x7.mjs";
 
 const SOURCE_DIR = "assets/mind-maps";
 const DEFAULT_OUT_DIR = "preview-exports";
+/** Marketplace listing photos, kept beside the gallery previews. */
+const LISTING_SUBDIR = "listing";
 
 const MAX_EDGE = number(process.env.PREVIEW_MAX_EDGE, 900);
 const BLUR_SIGMA = number(process.env.PREVIEW_BLUR_SIGMA, 3.4);
 const WATERMARK = process.env.PREVIEW_WATERMARK || "ANESTHESIASTUDYCO.COM";
 const BAND_TEXT = process.env.PREVIEW_BAND_TEXT || "PREVIEW · ANESTHESIASTUDYCO.COM";
+
+/** Square side of a marketplace listing photo, in pixels. */
+const LISTING_SIZE = number(process.env.PREVIEW_LISTING_SIZE, 1200);
+/**
+ * How much of the map the listing photo is allowed to show, as a fraction of its
+ * shorter edge. At 1 the crop is the tallest square that fits, which on a
+ * landscape map already hides roughly the outer 40% of the width. Lower it to
+ * show less; 0.6 is a close-up of the middle and nothing else.
+ */
+const LISTING_ZOOM = Math.min(1, Math.max(0.3, number(process.env.PREVIEW_LISTING_ZOOM, 1)));
 
 /** Diagonal, because horizontal watermarks are far easier to crop or clone out. */
 const WATERMARK_ANGLE = -28;
@@ -84,11 +96,11 @@ async function main() {
   }
 
   const outDir = options.deploy ? SOURCE_DIR : options.outDir;
-  await mkdir(outDir, { recursive: true });
+  await mkdir(path.join(outDir, LISTING_SUBDIR), { recursive: true });
 
   console.log(
     `Watermarking ${files.length} preview${files.length === 1 ? "" : "s"} → ${outDir}` +
-      ` (max ${MAX_EDGE}px, blur ${BLUR_SIGMA})`,
+      ` (max ${MAX_EDGE}px, blur ${BLUR_SIGMA}, listing crop ${LISTING_SIZE}px @ ${LISTING_ZOOM})`,
   );
 
   let sourceBytes = 0;
@@ -104,18 +116,26 @@ async function main() {
 
       const source = await readFile(path.join(SOURCE_DIR, file));
 
-      let output;
+      let rendered;
       try {
-        output = await watermark(source);
+        rendered = await renderPreviews(source);
       } catch (error) {
         fail(`${file} could not be watermarked: ${error.message}`);
       }
 
       sourceBytes += source.length;
-      outputBytes += output.length;
-      manifest[file] = createHash("sha256").update(output).digest("hex").slice(0, 16);
+      outputBytes += rendered.site.length + rendered.listing.length;
+      manifest[file] = {
+        site: digest(rendered.site),
+        listing: digest(rendered.listing),
+      };
 
-      await writeOutput(path.join(outDir, file), output, options.deploy);
+      await writeOutput(path.join(outDir, file), rendered.site, options.deploy);
+      await writeOutput(
+        path.join(outDir, LISTING_SUBDIR, file),
+        rendered.listing,
+        options.deploy,
+      );
     }
   };
 
@@ -132,6 +152,8 @@ async function main() {
           generatedBy: "scripts/build-previews.mjs",
           maxEdge: MAX_EDGE,
           blurSigma: BLUR_SIGMA,
+          listingSize: LISTING_SIZE,
+          listingZoom: LISTING_ZOOM,
           watermark: WATERMARK,
           bandText: BAND_TEXT,
           files: manifest,
@@ -143,28 +165,107 @@ async function main() {
   }
 
   console.log(
-    `Done: ${megabytes(sourceBytes)} of artwork → ${megabytes(outputBytes)} of watermarked previews.`,
+    `Done: ${megabytes(sourceBytes)} of artwork → ${megabytes(outputBytes)} of watermarked previews,\n` +
+      `      ${files.length} for the gallery and ${files.length} square listing photos in ${LISTING_SUBDIR}/.`,
   );
 }
 
 /**
- * Resize, blur, then stamp the watermark on top.
+ * Renders both previews a map needs, from one decode of the source.
+ *
+ *   site     the whole map, scaled down and blurred — this site's gallery
+ *   listing  a square crop of the middle, for Etsy and Shopify listing photos
+ *
+ * The listing crop exists because a marketplace photo is the one place a shopper
+ * can study the artwork at leisure, and a full-frame shot of a mind map gives
+ * away the thing being sold: the layout. Showing the middle of the map proves
+ * the style and the topic without ever showing how the whole thing is arranged.
+ * Square is also the shape Etsy and Shopify crop their grids to, so this is the
+ * region a shopper sees anyway — cropping it deliberately just means the rest of
+ * the map is never uploaded in the first place.
+ */
+async function renderPreviews(source) {
+  // One decode, reused by both variants. Raw pixels avoid re-encoding a large
+  // PNG in between.
+  const { data, info } = await sharp(source, { failOn: "error" })
+    .rotate()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const decoded = {
+    data,
+    options: { raw: { width: info.width, height: info.height, channels: info.channels } },
+  };
+
+  return {
+    site: await sitePreview(decoded, info),
+    listing: await listingPreview(decoded, info),
+  };
+}
+
+/** The whole map, small and blurred, as the gallery on this site shows it. */
+async function sitePreview(decoded, info) {
+  const stage = sharp(decoded.data, decoded.options).resize({
+    width: MAX_EDGE,
+    height: MAX_EDGE,
+    fit: "inside",
+    withoutEnlargement: true,
+  });
+
+  return finish(stage, blurFor(fitInside(info, MAX_EDGE).width, info.width, info.width));
+}
+
+/** A square of the middle of the map, at the size marketplaces want to be given. */
+async function listingPreview(decoded, info) {
+  const side = Math.round(Math.min(info.width, info.height) * LISTING_ZOOM);
+  const stage = sharp(decoded.data, decoded.options)
+    .extract({
+      left: Math.round((info.width - side) / 2),
+      top: Math.round((info.height - side) / 2),
+      width: side,
+      height: side,
+    })
+    .resize(LISTING_SIZE, LISTING_SIZE);
+
+  return finish(stage, blurFor(LISTING_SIZE, side, info.width));
+}
+
+/**
+ * How hard to blur, in pixels of the image being written.
+ *
+ * A fixed blur would not mean the same thing to both variants. The listing crop
+ * shows roughly half as much of the map across a wider output, so its lettering
+ * lands about twice the size the gallery's does and a sigma that erases one
+ * would leave the other readable. Scaling the blur by how much the source is
+ * magnified keeps a line of the artist's handwriting equally unreadable in both.
+ */
+function blurFor(outputWidth, visibleSourceWidth, sourceWidth) {
+  return BLUR_SIGMA * (outputWidth / visibleSourceWidth) * (sourceWidth / MAX_EDGE);
+}
+
+/** What `fit: inside` will produce, without doing the work to find out. */
+function fitInside(info, maxEdge) {
+  const scale = Math.min(1, maxEdge / Math.max(info.width, info.height));
+  return { width: Math.round(info.width * scale), height: Math.round(info.height * scale) };
+}
+
+/**
+ * Blur, then stamp the watermark on top.
  *
  * Order matters: the watermark goes on after the blur, so it stays crisp and
  * cannot be blurred away, and it is composited across the whole frame rather
  * than into one corner that a crop would remove.
  */
-async function watermark(source) {
-  const resized = await sharp(source, { failOn: "error" })
-    .rotate()
-    .resize({ width: MAX_EDGE, height: MAX_EDGE, fit: "inside", withoutEnlargement: true })
-    .blur(BLUR_SIGMA)
+async function finish(stage, sigma) {
+  const resized = await stage
+    .blur(sigma)
     // Artwork with transparency would otherwise show the page background through
     // the watermark; paper white matches how these maps are meant to print.
     .flatten({ background: "#ffffff" })
+    .png()
     .toBuffer();
 
-  const { width, height } = await sharp(resized).metadata();
+  const { width } = await sharp(resized).metadata();
 
   const tileScale = Math.max(2, Math.round(width / 420));
   const bandScale = Math.max(2, Math.round(width / 300));
@@ -350,6 +451,10 @@ function parseArgs(argv) {
 function number(value, fallback) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function digest(buffer) {
+  return createHash("sha256").update(buffer).digest("hex").slice(0, 16);
 }
 
 function megabytes(bytes) {

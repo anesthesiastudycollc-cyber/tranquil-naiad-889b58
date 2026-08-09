@@ -137,27 +137,37 @@ because they share one source.
 
 There is no live API sync on purpose. Shopify and Etsy each require their own app credentials, and
 a background job that silently rewrites live listings is a far larger commitment than a file the
-shop owner reviews before uploading. The export image column points at the watermarked previews
-this site serves, which is what a listing gallery should show; the full-resolution artwork belongs
-in each channel's digital-delivery slot, not in its photo gallery.
+shop owner reviews before uploading. The export image column points at the square listing crops
+under `/assets/mind-maps/listing/` rather than the wide gallery previews, so a marketplace photo
+shows the subject and style of a map without showing how its whole layout is arranged. The
+full-resolution artwork belongs in each channel's digital-delivery slot, not in its photo gallery.
 
 ## Preview Protection
 
 `assets/mind-maps/` holds the source artwork, and none of it is published as-is. The Netlify build
 command runs `scripts/build-previews.mjs`, which rewrites each image in the disposable build
-workspace as a 900px, blurred copy with `ANESTHESIASTUDYCO.COM` tiled diagonally across it and a
-`PREVIEW` band through the middle. Because the degradation is in the pixels, it holds for a
-screenshot, a right-click save, a hotlink, and an Image CDN request at any width — none of which a
-CSS `filter` survives.
+workspace, producing two protected variants:
+
+| Variant | Where it goes | What it is |
+| --- | --- | --- |
+| Gallery preview | `assets/mind-maps/<file>` | 900px on the long edge, blurred, tiled `ANESTHESIASTUDYCO.COM` watermark and a `PREVIEW` band |
+| Listing photo | `assets/mind-maps/listing/<file>` | Square 1200px crop of the middle of the map, blurred proportionally harder, same watermark |
+
+Because the degradation is in the pixels, it holds for a screenshot, a right-click save, a hotlink,
+and an Image CDN request at any width — none of which a CSS `filter` survives. The listing crop
+adds the one thing blur alone does not solve on a marketplace: it never shows the full landscape,
+so the arrangement of the map — the thing being sold — is not given away by the listing photo.
 
 The files buyers pay for are untouched by this: they live in the `digital-products` blob store and
 are served full-resolution and clean by `/api/download`.
 
 ```bash
-npm run previews          # watermarked copies in preview-exports/, for Etsy and Shopify listings
+npm run previews          # watermarked copies in preview-exports/ (+ preview-exports/listing/)
 npm run previews:deploy   # what the build runs; overwrites assets/mind-maps in place
 ```
 
 `previews:deploy` is destructive by design and refuses to run outside a Netlify build, or when git
-does not already hold a clean copy of the artwork it would overwrite. Blur strength and output size
-are set with the `PREVIEW_BLUR_SIGMA` and `PREVIEW_MAX_EDGE` environment variables.
+does not already hold a clean copy of the artwork it would overwrite. Blur strength, output size,
+and how much of the map the listing crop shows are set with `PREVIEW_BLUR_SIGMA`,
+`PREVIEW_MAX_EDGE`, `PREVIEW_LISTING_SIZE`, and `PREVIEW_LISTING_ZOOM` (a fraction of the short
+edge; `1` takes the largest square that fits, `0.6` shows considerably less).

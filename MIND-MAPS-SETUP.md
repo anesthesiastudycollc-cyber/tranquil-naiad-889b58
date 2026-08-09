@@ -33,9 +33,10 @@ what is and is not configured.
 The pictures on your website are previews. Every time the site publishes, it
 automatically shrinks each mind map, blurs it, and stamps
 `ANESTHESIASTUDYCO.COM` across it — so anyone who screenshots, saves, or hotlinks
-a preview walks away with a blurred, watermarked picture and nothing else. You do
-not have to prepare anything: put your normal artwork in `assets/mind-maps/` and
-the protection is applied for you.
+a preview walks away with a blurred, watermarked picture and nothing else. It
+also makes a second, square copy cropped to the middle of the map for Etsy and
+Shopify listing photos (Step 4). You do not have to prepare anything: put your
+normal artwork in `assets/mind-maps/` and the protection is applied for you.
 
 The **real, full-quality file** that a customer receives after paying is never
 watermarked, and it has to be uploaded separately.
@@ -119,9 +120,10 @@ you check it first.
 3. Go to your Shopify admin → **Products** → **Import**.
 4. Choose that file and click **Upload and continue**.
 5. Shopify shows you a preview. Check it, then click **Import products**.
-6. The image column already points at your watermarked website previews, so the
-   listings are protected as soon as they import. Attach the full-quality file as
-   the digital download — and do **not** swap the listing photo for it.
+6. The image column already points at your **cropped, watermarked listing
+   photos** — a square view of the middle of each map, so the listing never
+   shows the whole layout. Attach the full-quality file as the digital download
+   — and do **not** swap the listing photo for it.
 
 ### For Etsy
 
@@ -133,29 +135,48 @@ created in their form. So this is a worksheet rather than an import:
 2. Open the downloaded file in Excel, Numbers, or Google Sheets.
 3. Each row is one listing. Copy and paste the Title, Description, Price, and Tags
    columns into Etsy's **Add a listing** form.
-4. For the listing photos, use the watermarked previews — see "Getting watermarked
-   images to upload" below. Attach the full-quality artwork as the digital file
-   Etsy delivers after payment.
+4. For the listing photos, use the square cropped previews — see "Getting
+   listing photos to upload" below. Attach the full-quality artwork as the
+   digital file Etsy delivers after payment.
 
-### Getting watermarked images to upload
+**Listings you have already published on Etsy** keep whichever photo you
+uploaded at the time; nothing on your website can reach in and change them. To
+protect an existing listing, open it on Etsy, upload the square cropped photo
+for that map, and delete the old picture.
+
+### Getting listing photos to upload
 
 Etsy and Shopify keep their own copies of listing photos, so they need the
-watermarked image files rather than a link to your site. On your own computer, in
-the project folder:
+image files rather than a link to your site. On your own computer, in the
+project folder:
 
 ```bash
 npm run previews
 ```
 
-This creates a folder called `preview-exports` containing a blurred, watermarked
-version of every mind map, ready to upload as listing photos. It does not change
-your original artwork.
+This creates a folder called `preview-exports` with two sets inside, and does
+not change your original artwork:
+
+- `preview-exports/` — the wide blurred previews, the same ones your website
+  shows.
+- `preview-exports/listing/` — **the ones to upload to Etsy and Shopify.**
+  Square, blurred, watermarked, and cropped to the middle of the map so a
+  shopper can see the topic and the style without seeing how the whole map is
+  laid out.
 
 If you want them blurrier or less blurry, run it like this instead — `4.5` is
 blurrier, `2` is lighter:
 
 ```bash
 PREVIEW_BLUR_SIGMA=4.5 npm run previews
+```
+
+And if you want the listing photo to show even less of the map, lower this
+number — `1` is the default and shows the tallest square that fits, `0.6` shows
+a good deal less:
+
+```bash
+PREVIEW_LISTING_ZOOM=0.6 npm run previews
 ```
 
 **The one rule for all three shops:** the watermarked picture is what shoppers
