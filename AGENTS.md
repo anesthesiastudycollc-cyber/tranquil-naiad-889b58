@@ -33,6 +33,10 @@ No frontend framework and no bundler for the pages themselves.
 ├── scripts/
 │   └── generate-previews.mjs       # Rebuilds both generated folders from the artwork
 ├── db/                             # Drizzle schema + client for the order ledger
+├── scripts/
+│   ├── build-previews.mjs          # Burns blur + watermark into previews at deploy time
+│   └── font5x7.mjs                 # Bitmap font the watermark is drawn from
+├── assets/mind-maps/               # SOURCE artwork — never published as-is
 ├── netlify.toml
 ├── README.md
 └── AGENTS.md
@@ -87,8 +91,26 @@ No frontend framework and no bundler for the pages themselves.
   media's position — uploading a new image and deleting the old one moves the product's featured
   photo to the end. `SHOPIFY_API_VERSION` overrides the pinned version when Shopify retires one.
 - **Keep dependencies few and deliberate.** The site was originally dependency-free; npm exists now
-  only because payments and digital delivery require it (Stripe, Netlify Blobs, Netlify Database).
-  Hold that line — no bundlers, no CDN scripts, no UI libraries.
+  only because payments and digital delivery require it (Stripe, Netlify Blobs, Netlify Database),
+  and `sharp`, which runs at build time only to watermark previews. Hold that line — no bundlers,
+  no CDN scripts, no UI libraries.
+- **Preview protection is burned into the pixels at build time, never done in CSS.** The Netlify
+  build runs `scripts/build-previews.mjs`, which rewrites every file in `assets/mind-maps/` in the
+  disposable build workspace as a downscaled, blurred, watermarked copy, so the deploy only ever
+  contains protected images. Doing it in CSS — as the gallery once did — protects nothing: the rule
+  can be switched off in devtools, and it does not apply at all to the image's own URL or to a
+  `/.netlify/images?url=…&w=4000` request. For the same reason, do not add a lightbox or any
+  "view larger" affordance that reaches for a second, cleaner source. The watermark is drawn from a
+  hand-coded bitmap font (`scripts/font5x7.mjs`) rather than a typeface, because a build machine
+  with no fonts installed would silently render a blank watermark and publish naked artwork.
+  `--deploy` refuses to run unless git holds a clean copy of the artwork it is about to overwrite.
+- **The marketplace listing photo is a square crop of the middle of the map**, written to
+  `assets/mind-maps/listing/` by the same script and pointed at by the `Image Src` / `Image URL`
+  columns of `/api/mind-maps-export`. Blur hides the fine print, but a full-frame photo still gives
+  away the layout, which is the thing being sold. Blur sigma is scaled by magnification
+  (`blurFor()`), so the crop is no more legible than the wide preview despite being enlarged. The
+  gallery on `mind-maps.html` deliberately keeps the wide variant — a shopper on our own site has
+  already found the product page and needs to see what shape the map is.
 - **Prices live only in `netlify/lib/catalog.ts` and `netlify/lib/mind-maps.ts`.** The browser posts
   product **ids** to `/api/checkout`; the server looks each one up and builds the Stripe line items.
   Never accept a price, name, or quantity from the client — that is the whole reason the storefront
@@ -109,6 +131,11 @@ No frontend framework and no bundler for the pages themselves.
   exception, added at the owner's explicit request after three asks: it changes listing photos and
   nothing else, because a sharp listing photo is the one thing a code change genuinely could not
   fix and it was costing sales.
+- **Shopify and Etsy are synced by export file, not by API.** `/api/mind-maps-export` generates
+  upload sheets from the same list the site sells from. A live sync would need per-marketplace app
+  credentials and would rewrite live listings unattended — deliberately not done. It also means
+  listings already published on a marketplace keep whichever photo was uploaded at the time —
+  nothing in this repo can retroactively protect them; the shop owner has to replace the photo.
 - **Stripe is the authority on entitlement, not the database.** `/api/download` re-retrieves the
   Checkout session and confirms it paid for that exact product. The `orders` table is a ledger for
   bookkeeping only, and its write in `/api/order` is deliberately best-effort inside a `try/catch`

@@ -28,6 +28,13 @@ import { siteOrigin } from "../lib/stripe.js";
  * Keep the SKU column as the map id. `/api/marketplace-sync` matches a live
  * listing back to a map by SKU, and falls back to fuzzy title matching only when
  * the SKU is absent.
+ * The image column points at the square listing crops this site serves from
+ * `/assets/mind-maps/listing/`. Those are the right pictures for a marketplace
+ * gallery, and deliberately so: they are blurred, stamped, and cropped to the
+ * middle of the map at deploy time, so a shopper browsing Etsy or Shopify sees
+ * the subject and the style without being shown how the whole layout is
+ * arranged — which is the thing being sold. The clean full-resolution file
+ * belongs in each marketplace's digital-delivery slot, never in its gallery.
  */
 export default async (req: Request) => {
   const format = new URL(req.url).searchParams.get("format") ?? "shopify";
@@ -52,6 +59,16 @@ export default async (req: Request) => {
 };
 
 const PRICE = (MIND_MAP_UNIT_AMOUNT / 100).toFixed(2);
+
+/**
+ * The marketplace listing photo: a square, blurred, watermarked crop of the
+ * middle of the map, written to `listing/` by `scripts/build-previews.mjs`.
+ * Deliberately not the gallery preview at `/assets/mind-maps/<file>` — that one
+ * is the full landscape, which shows a shopper the entire layout for free.
+ */
+function listingImage(origin: string, file: string): string {
+  return `${origin}/assets/mind-maps/listing/${file}`;
+}
 
 function description(title: string): string {
   return (
