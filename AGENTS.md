@@ -19,10 +19,12 @@ No frontend framework and no bundler for the pages themselves.
 │   │   ├── catalog.ts              # SOURCE OF TRUTH for products and prices
 │   │   ├── mind-maps.ts            # SOURCE OF TRUTH for the individual mind maps
 │   │   ├── stripe.ts               # Stripe client + not-configured handling
+│   │   ├── marketplaces.ts         # Etsy/Shopify credentials, token refresh, API clients
+│   │   ├── marketplace-sync.ts     # Matches live listings to maps, replaces their photos
 │   │   ├── tokens.ts               # HMAC-signed download links
 │   │   └── fulfilment.ts           # Resolves a paid Stripe session to catalog items
 │   ├── functions/                  # catalog, mind-maps, mind-maps-export, checkout, order,
-│   │                               #   download, setup-check
+│   │                               #   download, setup-check, marketplace-sync
 │   └── database/migrations/        # Applied automatically by Netlify at deploy
 ├── assets/
 │   ├── mind-maps/                  # Mind map artwork — SOURCE ONLY, never served
@@ -60,11 +62,30 @@ No frontend framework and no bundler for the pages themselves.
   the sharp bytes have already reached the browser. The rewrite fails safe: a file with no generated
   preview 404s rather than falling through to the artwork. `sharp` is intentionally not in
   `package.json` — install it with `--no-save` for the run, and commit the regenerated output.
-- **A marketplace listing image cannot be fixed from this repo.** Etsy and Shopify listings display
-  a file uploaded to them at creation time and hosted by them, so changing the export only affects
-  listings created *from* the export afterwards. `assets/listing-images/` exists for this: 2000px
-  blurred copies at Etsy's requested size, for the shop owner to re-upload by hand. Do not tell the
-  owner that a code change has fixed a live listing.
+- **A live marketplace listing image can only be fixed through that marketplace's API.** Etsy and
+  Shopify listings display a file uploaded to them at creation time and hosted by them, so changing
+  the export only affects listings created *from* the export afterwards. Two things address this:
+  `assets/listing-images/` holds 2000px blurred copies at Etsy's requested size for manual
+  re-upload, and `/api/marketplace-sync` pushes them through the Etsy and Shopify APIs. Never tell
+  the owner that an ordinary code change has fixed a live listing — only a sync run or a manual
+  re-upload does.
+- **`/api/marketplace-sync` writes to a live shop, so it is guarded three ways.** It requires
+  `MARKETPLACE_SYNC_TOKEN` (compared without early exit) and 401s otherwise; it is a dry run unless
+  the request is a POST carrying `confirm=1`; and it replaces only the primary photo unless
+  `scope=all`. It matches a listing to a map by SKU (`map-05`, which the export writes) with a
+  normalised-title fallback, and reports anything unmatched or ambiguous rather than guessing —
+  putting the wrong artwork on a listing is worse than leaving it sharp. Writes are batched
+  (`limit`, default 10) because Etsy rate-limits and a function invocation is time-boxed.
+- **Etsy's durable credential is the refresh token, not the access token.** Access tokens last an
+  hour, and Etsy rotates the refresh token on every use, so `etsyAccessToken()` persists the rotated
+  value to the `marketplace-tokens` Blobs store and prefers it over `ETSY_REFRESH_TOKEN`. Without
+  that the environment variable goes stale and the sync starts failing weeks later for no visible
+  reason. A failed refresh clears the stored copy so the fallback is the variable the owner can
+  actually replace.
+- **Shopify images are replaced with `fileUpdate`, not by upload-and-delete.** The REST product
+  image endpoints are retired, and swapping `originalSource` behind an existing media id keeps the
+  media's position — uploading a new image and deleting the old one moves the product's featured
+  photo to the end. `SHOPIFY_API_VERSION` overrides the pinned version when Shopify retires one.
 - **Keep dependencies few and deliberate.** The site was originally dependency-free; npm exists now
   only because payments and digital delivery require it (Stripe, Netlify Blobs, Netlify Database).
   Hold that line — no bundlers, no CDN scripts, no UI libraries.
@@ -81,9 +102,13 @@ No frontend framework and no bundler for the pages themselves.
   reads to decide download entitlement. A bundle line item would cover five products at once and
   break that mapping. Stripe rejects `discounts` alongside `allow_promotion_codes`, so the automatic
   saving takes precedence over promo codes when it applies.
-- **Shopify and Etsy are synced by export file, not by API.** `/api/mind-maps-export` generates
-  upload sheets from the same list the site sells from. A live sync would need per-marketplace app
-  credentials and would rewrite live listings unattended — deliberately not done.
+- **Shopify and Etsy listing *content* is synced by export file; only the *image* is synced by API.**
+  `/api/mind-maps-export` generates upload sheets from the same list the site sells from, and the
+  owner reviews the file before uploading. A full content sync would rewrite live titles, prices,
+  and descriptions unattended — still deliberately not done. `/api/marketplace-sync` is the narrow
+  exception, added at the owner's explicit request after three asks: it changes listing photos and
+  nothing else, because a sharp listing photo is the one thing a code change genuinely could not
+  fix and it was costing sales.
 - **Stripe is the authority on entitlement, not the database.** `/api/download` re-retrieves the
   Checkout session and confirms it paid for that exact product. The `orders` table is a ledger for
   bookkeeping only, and its write in `/api/order` is deliberately best-effort inside a `try/catch`

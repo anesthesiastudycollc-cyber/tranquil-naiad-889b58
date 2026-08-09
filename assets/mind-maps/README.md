@@ -26,11 +26,16 @@ all — it lives in the `digital-products` Netlify Blobs store.
 
 ## Marketplaces need the files uploaded, not just the link
 
-Changing this repository fixes this website. It does **not** change a listing that
-is already live on Etsy or Shopify. Those listings show a photo that was uploaded
-to the marketplace when the listing was created and is hosted by them; no setting
-here can reach it. To fix those, replace the photo on each listing with the
-matching file from `assets/listing-images/`. See MIND-MAPS-SETUP.md.
+Changing this repository fixes this website. It does **not**, on its own, change a
+listing that is already live on Etsy or Shopify. Those listings show a photo that
+was uploaded to the marketplace when the listing was created and is hosted by
+them, so only that marketplace's API can replace it.
+
+`/api/marketplace-sync` does exactly that: it matches each live listing to a map
+by SKU and uploads the matching file from `assets/listing-images/`. It needs Etsy
+and Shopify credentials, is a dry run until confirmed, and is documented in
+MIND-MAPS-SETUP.md. Replacing the photos by hand from `assets/listing-images/`
+remains a supported alternative.
 
 ## After adding or replacing artwork
 

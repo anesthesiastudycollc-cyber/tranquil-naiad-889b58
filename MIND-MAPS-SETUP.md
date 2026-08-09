@@ -38,10 +38,10 @@ receives after paying has to be uploaded separately.
 Each map has a file name like `mind-map-02.png`. The buyer of map 02 gets whatever
 you upload under that exact name.
 
-> **Etsy and Shopify are not covered by this automatically.** A listing you have
-> already published shows a photo you uploaded to Etsy or Shopify, stored on their
-> servers. Nothing on this website can change it. See
-> [Replacing the photos on listings you already published](#replacing-the-photos-on-listings-you-already-published).
+> **Etsy and Shopify listings you have already published are handled separately.**
+> They show a photo stored on Etsy's or Shopify's servers, so this website cannot
+> change them on its own. There is now a page that does it for you — see
+> [Step 4b](#step-4b--blur-the-photos-on-etsy-and-shopify-automatically).
 
 ### Doing it from the Netlify website
 
@@ -106,10 +106,10 @@ your account, which it must do before real payments will go through.
 Your website is now the master list. Shopify and Etsy get filled in **from** it, so
 all three places show the same titles at the same price.
 
-There is no automatic robot pushing changes to Shopify and Etsy — that would need
-extra passwords from both companies and could silently change your live listings.
-Instead you download a file and upload it, which takes about two minutes and lets
-you check it first.
+Adding and updating listings is done with a file you download and upload, which
+takes about two minutes and lets you check it first. Replacing the **photos** on
+listings you already published is a separate job and is automatic — that is
+Step 4b below.
 
 ### For Shopify
 
@@ -128,11 +128,111 @@ you check it first.
 
 New listings created from the export above get the blurred photo automatically.
 Listings that already exist do not: the photo on them is a file you uploaded to
-Etsy or Shopify when you created the listing, and it lives on their servers. This
-website cannot reach it. If a map still looks sharp and readable on Etsy, this is
-why, and it is the only part of this that has to be done by hand.
+Etsy or Shopify when you created the listing, and it lives on their servers. If a
+map still looks sharp and readable on Etsy, this is why.
 
-The replacement files are ready and sized for Etsy (2000px). Each one is at:
+**Step 4b below does this for you.** Do that first. Only fall back to replacing
+photos by hand — described at the end of Step 4b — if you would rather not
+connect the two accounts.
+
+### For Etsy
+
+Etsy does not accept an upload file for new listings — every listing has to be
+created in their form. So this is a worksheet rather than an import:
+
+1. Go to:
+   `https://anesthesiastudyco.com/api/mind-maps-export?format=etsy`
+2. Open the downloaded file in Excel, Numbers, or Google Sheets.
+3. Each row is one listing. Copy and paste the Title, Description, Price, and Tags
+   columns into Etsy's **Add a listing** form.
+4. For the listing photo, use the **Image URL** column — open that link, save the
+   picture, and upload it. It is the blurred, watermarked version, on purpose: a
+   listing photo is visible to everyone browsing Etsy, so a sharp one gives the
+   map away to people who never buy. Attach your full-quality artwork as the
+   **digital file** the buyer downloads after paying — that part is not blurred.
+
+---
+
+## Step 4b — Blur the photos on Etsy and Shopify automatically
+
+This replaces the photo on each of your live listings with the blurred,
+watermarked version, so nobody can read a map from the listing page and skip
+buying it. It is the same picture your website already shows.
+
+It has to be set up once, because Etsy and Shopify will not let a website change
+your listings without your permission.
+
+### First, pick a password for the page
+
+The page that does this can change your live shop, so it is locked.
+
+1. Go to **https://app.netlify.com**, click your site, then
+   **Site configuration → Environment variables**.
+2. Click **Add a variable**. Key: `MARKETPLACE_SYNC_TOKEN`. Value: a long random
+   string you invent — 30 or more letters and numbers, no spaces. Save it
+   somewhere you can find it again, like your password manager.
+3. Click **Deploys → Trigger deploy → Deploy site**.
+
+### Connect Etsy
+
+1. Go to **https://www.etsy.com/developers/register** and create an app for your
+   own shop. Etsy shows you a **keystring** when it is approved.
+2. Authorise the app for your shop with the **`listings_w`** permission. Etsy's
+   sign-in flow gives you back a **refresh token**.
+3. Find your numeric **shop id** — Etsy shows it in the developer console, and it
+   is a number, not your shop name.
+4. Back in Netlify, add three more environment variables:
+   - `ETSY_API_KEY` — the keystring
+   - `ETSY_REFRESH_TOKEN` — the refresh token
+   - `ETSY_SHOP_ID` — the number
+5. Trigger a deploy again.
+
+Etsy refresh tokens expire after 90 days if unused. The site renews yours every
+time the sync runs, so running it occasionally keeps the connection alive. If it
+does lapse, redo step 2 and paste the new refresh token in.
+
+### Connect Shopify
+
+1. In Shopify admin go to **Settings → Apps and sales channels → Develop apps →
+   Create an app**.
+2. Under **Configuration → Admin API integration**, tick **`write_files`** and
+   **`read_products`**. Save.
+3. Click **Install app**, then copy the **Admin API access token**. Shopify shows
+   it once.
+4. In Netlify add:
+   - `SHOPIFY_STORE_DOMAIN` — e.g. `anesthesia-study-co-llc.myshopify.com`
+   - `SHOPIFY_ADMIN_TOKEN` — the token you copied
+5. Trigger a deploy.
+
+### Run it
+
+Open, replacing `YOUR-TOKEN` with the password from the first step:
+
+```
+https://anesthesiastudyco.com/api/marketplace-sync?token=YOUR-TOKEN
+```
+
+The page lists every listing it found, which mind map it matched, and what it
+**would** change. **Nothing has been changed at this point.** Read the list, then
+press **Replace the photos now**.
+
+It works through ten listings per run so it does not time out. When it finishes it
+tells you how many are left — reload and press the button again until none are.
+
+**"No published mind map has this SKU or title"** next to a listing means it could
+not tell which map that listing is. Open the listing on Etsy or Shopify, set its
+SKU to the map id (`map-05`, `map-27`, and so on — the same ids in the export
+file), and run the sync again. Matching by SKU is exact; matching by title is a
+guess and the sync refuses to guess wrongly.
+
+**"Main photo only"** is the default and leaves any other photos on the listing
+alone, in case some of them are not artwork. Choose **Every photo** once you have
+checked that all the photos on your listings are maps.
+
+### Or do it by hand instead
+
+You do not have to connect the accounts. The replacement files are ready and
+sized for Etsy (2000px). Each one is at:
 
 ```
 https://anesthesiastudyco.com/assets/listing-images/mind-map-02.jpg
@@ -145,21 +245,6 @@ delete the old photo and drag the saved one in → **Publish**.
 
 **On Shopify** — **Products** → open the product → in the Media box, delete the
 old image and upload the saved one → **Save**.
-
-Work through your live listings once and they stay fixed. The website, the
-payment page, and any new listing you create from the export are already handled.
-
-### For Etsy
-
-Etsy does not accept an upload file for new listings — every listing has to be
-created in their form. So this is a worksheet rather than an import:
-
-1. Go to:
-   `https://anesthesiastudyco.com/api/mind-maps-export?format=etsy`
-2. Open the downloaded file in Excel, Numbers, or Google Sheets.
-3. Each row is one listing. Copy and paste the Title, Description, Price, and Tags
-   columns into Etsy's **Add a listing** form.
-4. Upload your full-quality artwork and attach the digital file on Etsy's side.
 
 ---
 
@@ -208,7 +293,10 @@ export const MIND_MAP_BUNDLE_AMOUNT = 900;
 | Yellow message: "Card payment on this site is being switched on" | `STRIPE_SECRET_KEY` is missing or the site has not been redeployed | Open `/api/setup-check`, then see [STRIPE-SETUP.md](STRIPE-SETUP.md) |
 | Buy buttons open Etsy instead of a payment page | Same as above | Open `/api/setup-check`, then see [STRIPE-SETUP.md](STRIPE-SETUP.md) |
 | "Preview image coming soon" on a card | No blurred version exists for that file name | Add the artwork to `assets/mind-maps/`, then regenerate (see `assets/mind-maps/README.md`) |
-| A map is sharp and readable on Etsy or Shopify | That listing's photo was uploaded to them before, and lives on their servers | Replace it from `assets/listing-images/` — see the section above |
+| A map is sharp and readable on Etsy or Shopify | That listing's photo was uploaded to them before, and lives on their servers | Run Step 4b, or replace it by hand from `assets/listing-images/` |
+| Sync page says "no published mind map has this SKU or title" | It cannot tell which map that listing is | Set the listing's SKU to the map id, e.g. `map-05`, and run it again |
+| Sync page says the refresh token expired | Etsy refresh tokens lapse after 90 days unused | Re-authorise the Etsy app and set `ETSY_REFRESH_TOKEN` again (Step 4b) |
+| Sync page says "Not authorised" | The `token=` in the address does not match `MARKETPLACE_SYNC_TOKEN` | Check for a missing character, or reset the variable in Netlify and redeploy |
 | Customer says the download says "File not available yet" | You have not uploaded that map's full file yet | Do Step 2 for that map, then email them the file |
 | Bottom bar shows $10.00 for five maps | You are looking at an old cached page | Refresh the page with Ctrl+R (or Cmd+R) |
 

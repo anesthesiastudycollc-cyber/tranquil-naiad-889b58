@@ -7,10 +7,7 @@ import { siteOrigin } from "../lib/stripe.js";
  *
  * The website, Shopify, and Etsy all end up describing the same maps at the same
  * price because all three are generated from `netlify/lib/mind-maps.ts`. Editing
- * that one list and re-exporting is what keeps the channels in step — there is no
- * live API sync here, deliberately: Shopify and Etsy each need their own app
- * credentials, and a scheduled push that silently edits live listings is a much
- * bigger commitment than a file the shop owner reviews before uploading.
+ * that one list and re-exporting is what keeps the channels in step.
  *
  *   GET /api/mind-maps-export?format=shopify  → Shopify product import CSV
  *   GET /api/mind-maps-export?format=etsy     → listing worksheet for Etsy
@@ -24,8 +21,13 @@ import { siteOrigin } from "../lib/stripe.js";
  * Note what this export can and cannot do. It sets the image on listings created
  * *from* it. A listing already live on Etsy or Shopify shows a file that was
  * uploaded to that marketplace when it was created, hosted by them — nothing this
- * site serves can reach it. Those have to be re-uploaded from
- * `assets/listing-images/` in the marketplace's own listing editor.
+ * site serves can reach it. Fixing those is `/api/marketplace-sync`, which writes
+ * the blurred image through each marketplace's API; this export covers only new
+ * listings.
+ *
+ * Keep the SKU column as the map id. `/api/marketplace-sync` matches a live
+ * listing back to a map by SKU, and falls back to fuzzy title matching only when
+ * the SKU is absent.
  */
 export default async (req: Request) => {
   const format = new URL(req.url).searchParams.get("format") ?? "shopify";
