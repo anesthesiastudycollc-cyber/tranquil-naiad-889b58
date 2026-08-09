@@ -233,6 +233,11 @@
       overflow: hidden;
     }
 
+    /* Previews are deliberately obscured: the artwork is legible enough at this
+       size to study from, so the gallery sells the topic and the title, not the
+       content. Tune --preview-blur to taste. The scale crops the soft fringe a
+       blur leaves at the edges, and the ::after watermark below stays sharp on
+       top because it belongs to .thumb, not to the image. */
     .thumb img {
       width: 100%;
       height: 100%;
@@ -240,6 +245,9 @@
       display: block;
       user-select: none;
       -webkit-user-drag: none;
+      filter: blur(var(--preview-blur, 4px));
+      transform: scale(1.08);
+      pointer-events: none;
     }
 
     /* Watermark band across every preview */
@@ -414,7 +422,7 @@
 
     <div class="navlinks">
       <a href="index.html#app">App</a>
-      <a href="index.html#products">Products</a>
+      <a href="store.html">Products</a>
       <a href="mind-maps.html" aria-current="page">Mind Maps</a>
       <a href="index.html#social">Social</a>
       <a href="index.html#support">Support</a>
