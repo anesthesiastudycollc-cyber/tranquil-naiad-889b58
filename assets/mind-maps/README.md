@@ -1,27 +1,56 @@
-# Mind Map Preview Images
+# Mind Map Artwork (source files)
 
-Preview artwork for the mind map storefront (`/mind-maps.html`).
+This folder holds the mind map artwork the site works from. **Nothing in here is
+served to the public.**
 
-## Upload only watermarked, low-resolution previews here
+`netlify.toml` rewrites `/assets/mind-maps/*` to `/assets/previews/*`, so a
+request for the original file name returns the blurred, watermarked preview
+instead. That rewrite is the only thing standing between this folder and a free
+download, so leave it in place.
 
-Everything in this folder is served publicly at
-`https://anesthesiastudyco.com/assets/mind-maps/<filename>` and can be
-downloaded by anyone without paying. **Do not put the full-resolution PNG that
-buyers pay for in this folder.** The paid file is delivered by the store
-(Etsy/Shopify) after checkout.
+## The three folders
 
-A safe preview is roughly 1200px on the long edge with your own watermark burned
-into the image. The storefront also overlays a `PREVIEW · anesthesiastudyco.com`
-band on every thumbnail and downscales through the Netlify Image CDN, but the
-burned-in watermark is the part that survives a screenshot.
+| Folder | Contents | Public? |
+| --- | --- | --- |
+| `assets/mind-maps/` | Artwork exactly as exported. Source only. | No — rewritten to the preview |
+| `assets/previews/` | Generated: 560px, blurred, watermark burned in | Yes — what this website shows |
+| `assets/listing-images/` | Generated: 2000px, blurred, watermark burned in | Yes — what you upload to Etsy and Shopify |
 
-**Setting `published: false` does not protect a file.** The card disappears from
-the grid, but the image stays fetchable at its public URL. To take an unprotected
-file off the site, overwrite it with a watermarked export or delete it.
+The two generated folders are never edited by hand. Everything public reads from
+them: the gallery on `/mind-maps.html`, the eight cards on the landing page, the
+product image on the Stripe checkout page, and the image columns in the Shopify
+and Etsy upload sheets from `/api/mind-maps-export`.
+
+The full-resolution file a buyer actually receives is not in this repository at
+all — it lives in the `digital-products` Netlify Blobs store.
+
+## Marketplaces need the files uploaded, not just the link
+
+Changing this repository fixes this website. It does **not** change a listing that
+is already live on Etsy or Shopify. Those listings show a photo that was uploaded
+to the marketplace when the listing was created and is hosted by them; no setting
+here can reach it. To fix those, replace the photo on each listing with the
+matching file from `assets/listing-images/`. See MIND-MAPS-SETUP.md.
+
+## After adding or replacing artwork
+
+```
+npm install --no-save sharp
+node scripts/generate-previews.mjs
+```
+
+Then commit the new source file and both regenerated derivatives. A source file
+with no matching preview will 404 on the site, because the rewrite has nothing to
+point at — which is the safe failure, not a leak.
+
+Blur strength and watermark text are constants at the top of
+`scripts/generate-previews.mjs`. If a preview ever looks too readable, lower
+`BLUR_DIVISOR` and regenerate — do not rely on the CSS blur in the page, which is
+cosmetic and can be switched off by anyone with a browser's developer tools.
 
 ## Filenames
 
-Name files in sequence so they match the catalog in `mind-maps.html`:
+Name files in sequence so they match the catalog in `netlify/lib/mind-maps.ts`:
 
 ```
 mind-map-01.png
@@ -33,24 +62,18 @@ mind-map-126.png
 Gaps are fine, and files can arrive out of order — a filename with no catalog entry never
 renders, and a catalog entry with no file must stay `published: false`. Numbers past 99 are
 not zero-padded, so the folder does not sort in numeric order; the grid order comes from the
-`MAPS` array, not the filesystem.
+`MIND_MAPS` array, not the filesystem.
 
-Drop the files in with these names and they appear on the storefront on the next
-deploy — no other change needed to show the artwork.
+The landing page also shows eight images named `featured-*`. Those are generated
+from URLs listed in `scripts/generate-previews.mjs` rather than from this folder,
+because the landing page used to hot-link them sharp from the Shopify CDN.
 
 ## Then edit the catalog
 
-Open `mind-maps.html` and find the `MAPS` array near the bottom. For each map:
-
-| Field | What to set |
-| --- | --- |
-| `title` | The real topic, e.g. `"Malignant Hyperthermia"` — this feeds the card heading and the image alt text |
-| `url` | The product listing URL for that map. Leave `null` to send buyers to the shop homepage |
-| `published` | Set to `false` for any slot you are not selling yet |
-
-Pricing lives just above that array (`PRICE_SINGLE`, `BUNDLE_SIZE`,
-`BUNDLE_PRICE`). Change it in that one place and every price on the page,
-including the bundle math, updates.
+Open `netlify/lib/mind-maps.ts` and find the `MIND_MAPS` array. For each map set
+`file`, `title`, and `published`. Prices live just above it
+(`MIND_MAP_UNIT_AMOUNT`, `MIND_MAP_BUNDLE_SIZE`, `MIND_MAP_BUNDLE_AMOUNT`) and
+feed the page, the exports, and what Stripe charges from that one place.
 
 Two things are worth checking before publishing a slot:
 
@@ -64,9 +87,13 @@ Two things are worth checking before publishing a slot:
   card with an "Add to bundle" button, so a customer can pay for a map that does
   not exist. A slot with no file belongs at `published: false`.
 
+`published: false` hides a card but is not, on its own, protection — the preview
+at that file name stays fetchable. It is the preview, though, not the artwork, so
+an unpublished slot leaks nothing worth having.
+
 ## Adding more maps
 
-Add another entry to the `MAPS` array with the next filename in sequence. The
+Add another entry to the `MIND_MAPS` array with the next filename in sequence. The
 grid grows automatically. The landing page advertises a topic count
 (`index.html`, in the Mind Maps section) that is written by hand — bump it when
 the number of published maps changes.

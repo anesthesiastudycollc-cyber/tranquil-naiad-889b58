@@ -24,6 +24,12 @@ No frontend framework and no bundler for the pages themselves.
 │   ├── functions/                  # catalog, mind-maps, mind-maps-export, checkout, order,
 │   │                               #   download, setup-check
 │   └── database/migrations/        # Applied automatically by Netlify at deploy
+├── assets/
+│   ├── mind-maps/                  # Mind map artwork — SOURCE ONLY, never served
+│   ├── previews/                   # Generated 560px blurred — this site's imagery
+│   └── listing-images/             # Generated 2000px blurred — for Etsy/Shopify upload
+├── scripts/
+│   └── generate-previews.mjs       # Rebuilds both generated folders from the artwork
 ├── db/                             # Drizzle schema + client for the order ledger
 ├── netlify.toml
 ├── README.md
@@ -45,6 +51,20 @@ No frontend framework and no bundler for the pages themselves.
 
 ## Non-Obvious Decisions
 
+- **Product imagery is obscured in the file, never in CSS.** `assets/mind-maps/` holds the artwork
+  and is never served: `netlify.toml` rewrites `/assets/mind-maps/*` to `/assets/previews/*`, whose
+  files are downscaled, Gaussian-blurred, and watermarked by `scripts/generate-previews.mjs`. Every
+  public surface points at a generated copy — the gallery, the eight landing page cards, the Stripe
+  Checkout line item image, and the export image columns. The CSS `filter: blur()` still on
+  `mind-maps.html` is cosmetic only and must never be the thing relied on; a CSS filter runs after
+  the sharp bytes have already reached the browser. The rewrite fails safe: a file with no generated
+  preview 404s rather than falling through to the artwork. `sharp` is intentionally not in
+  `package.json` — install it with `--no-save` for the run, and commit the regenerated output.
+- **A marketplace listing image cannot be fixed from this repo.** Etsy and Shopify listings display
+  a file uploaded to them at creation time and hosted by them, so changing the export only affects
+  listings created *from* the export afterwards. `assets/listing-images/` exists for this: 2000px
+  blurred copies at Etsy's requested size, for the shop owner to re-upload by hand. Do not tell the
+  owner that a code change has fixed a live listing.
 - **Keep dependencies few and deliberate.** The site was originally dependency-free; npm exists now
   only because payments and digital delivery require it (Stripe, Netlify Blobs, Netlify Database).
   Hold that line — no bundlers, no CDN scripts, no UI libraries.

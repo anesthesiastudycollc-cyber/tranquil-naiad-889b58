@@ -233,11 +233,14 @@
       overflow: hidden;
     }
 
-    /* Previews are deliberately obscured: the artwork is legible enough at this
-       size to study from, so the gallery sells the topic and the title, not the
-       content. Tune --preview-blur to taste. The scale crops the soft fringe a
-       blur leaves at the edges, and the ::after watermark below stays sharp on
-       top because it belongs to .thumb, not to the image. */
+    /* The obscuring that matters is baked into the preview files themselves
+       (scripts/generate-previews.mjs downscales, blurs, and watermarks them, and
+       the sharp artwork is not served at all). This filter is a second, purely
+       cosmetic layer: it softens the join between the card and the image and
+       keeps the look consistent if a preview is ever regenerated more gently.
+       Turning it off in devtools reveals nothing, because the file that arrived
+       is already the blurred one. The ::after watermark below stays sharp on top
+       because it belongs to .thumb, not to the image. */
     .thumb img {
       width: 100%;
       height: 100%;
@@ -245,7 +248,7 @@
       display: block;
       user-select: none;
       -webkit-user-drag: none;
-      filter: blur(var(--preview-blur, 4px));
+      filter: blur(var(--preview-blur, 2px));
       transform: scale(1.08);
       pointer-events: none;
     }
@@ -546,9 +549,14 @@
     return bundles * pricing.bundleAmount + singles * pricing.unitAmount;
   }
 
-  /* Netlify Image CDN keeps previews small and fast, and serves WebP/AVIF automatically. */
+  /* Previews are already blurred and watermarked in the file itself — see
+     scripts/generate-previews.mjs. The Image CDN only resizes and re-encodes them
+     here; it never touches the original artwork, which is not publicly reachable.
+     Requesting /assets/mind-maps/... would work too (netlify.toml rewrites it to
+     the same place), but pointing straight at the preview keeps the sharp path out
+     of the page source entirely. */
   function previewSrc(file) {
-    return "/.netlify/images?url=" + encodeURIComponent("/assets/mind-maps/" + file) +
+    return "/.netlify/images?url=" + encodeURIComponent("/assets/previews/" + file) +
            "&w=600&h=450&fit=cover&q=60";
   }
 

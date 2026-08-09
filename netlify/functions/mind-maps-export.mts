@@ -15,8 +15,17 @@ import { siteOrigin } from "../lib/stripe.js";
  *   GET /api/mind-maps-export?format=shopify  → Shopify product import CSV
  *   GET /api/mind-maps-export?format=etsy     → listing worksheet for Etsy
  *
- * The image column points at the watermarked previews this site already serves.
- * Swap those for the full-resolution artwork before publishing listings.
+ * The image column points at `assets/listing-images/` — the 2000px blurred,
+ * watermarked versions, at the size Etsy asks for. Do not swap them for the
+ * full-resolution artwork: a marketplace listing image is public to everyone who
+ * browses the category, whether or not they ever buy, so a sharp listing image
+ * gives the product away. The buyer gets the full file after checkout.
+ *
+ * Note what this export can and cannot do. It sets the image on listings created
+ * *from* it. A listing already live on Etsy or Shopify shows a file that was
+ * uploaded to that marketplace when it was created, hosted by them — nothing this
+ * site serves can reach it. Those have to be re-uploaded from
+ * `assets/listing-images/` in the marketplace's own listing editor.
  */
 export default async (req: Request) => {
   const format = new URL(req.url).searchParams.get("format") ?? "shopify";
@@ -93,7 +102,7 @@ function shopifyCsv(origin: string): string {
     // Digital delivery: no shipping is ever calculated for these.
     "FALSE",
     "TRUE",
-    `${origin}/assets/mind-maps/${map.file}`,
+    listingImage(origin, map.file),
     "1",
     `${map.title} anesthesia mind map`,
     "FALSE",
@@ -135,10 +144,21 @@ function etsyCsv(origin: string): string {
     "I did",
     "Made to order",
     map.file,
-    `${origin}/assets/mind-maps/${map.file}`,
+    listingImage(origin, map.file),
   ]);
 
   return toCsv(columns, rows);
+}
+
+/**
+ * The 2000px blurred, watermarked version of a map, as an absolute URL.
+ *
+ * Marketplace listing images are seen by everyone browsing a category, not just
+ * buyers, so this never resolves to `assets/mind-maps/` — that path holds the
+ * artwork and is not served at all.
+ */
+function listingImage(origin: string, file: string): string {
+  return `${origin}/assets/listing-images/${file.replace(/\.png$/i, ".jpg")}`;
 }
 
 function handleFor(title: string, id: string): string {

@@ -30,12 +30,18 @@ what is and is not configured.
 
 ## Step 2 — Upload the real mind map files
 
-The pictures on your website are watermarked previews. They are deliberately low
-quality so nobody can steal them. The **real, full-quality file** that a customer
+The pictures on your website are blurred, watermarked previews, generated
+automatically from your artwork. Nobody browsing the website or the payment page
+is ever shown a readable copy. The **real, full-quality file** that a customer
 receives after paying has to be uploaded separately.
 
 Each map has a file name like `mind-map-02.png`. The buyer of map 02 gets whatever
 you upload under that exact name.
+
+> **Etsy and Shopify are not covered by this automatically.** A listing you have
+> already published shows a photo you uploaded to Etsy or Shopify, stored on their
+> servers. Nothing on this website can change it. See
+> [Replacing the photos on listings you already published](#replacing-the-photos-on-listings-you-already-published).
 
 ### Doing it from the Netlify website
 
@@ -113,8 +119,35 @@ you check it first.
 3. Go to your Shopify admin → **Products** → **Import**.
 4. Choose that file and click **Upload and continue**.
 5. Shopify shows you a preview. Check it, then click **Import products**.
-6. Afterwards, open a few products in Shopify and replace the preview image with
-   your full-quality artwork, and attach the digital file for delivery.
+6. Afterwards, open a few products in Shopify and attach the digital file for
+   delivery. **Leave the listing image as it is.** It is the blurred version, and
+   that is on purpose — a listing photo is visible to everyone browsing the
+   category, so a sharp one gives the map away to people who never buy.
+
+### Replacing the photos on listings you already published
+
+New listings created from the export above get the blurred photo automatically.
+Listings that already exist do not: the photo on them is a file you uploaded to
+Etsy or Shopify when you created the listing, and it lives on their servers. This
+website cannot reach it. If a map still looks sharp and readable on Etsy, this is
+why, and it is the only part of this that has to be done by hand.
+
+The replacement files are ready and sized for Etsy (2000px). Each one is at:
+
+```
+https://anesthesiastudyco.com/assets/listing-images/mind-map-02.jpg
+```
+
+Change the number for each map. Open the link, save the picture, then:
+
+**On Etsy** — Shop Manager → **Listings** → open the listing → in the Photos box,
+delete the old photo and drag the saved one in → **Publish**.
+
+**On Shopify** — **Products** → open the product → in the Media box, delete the
+old image and upload the saved one → **Save**.
+
+Work through your live listings once and they stay fixed. The website, the
+payment page, and any new listing you create from the export are already handled.
 
 ### For Etsy
 
@@ -148,7 +181,8 @@ Inside you will find a long list of lines that look like this:
 - **To hide a map**, change `published: true` to `published: false`. It disappears
   from the website and can no longer be bought.
 - **To show a map you have finally made artwork for**, change `published: false` to
-  `published: true`, and make sure the preview image is in `assets/mind-maps/`.
+  `published: true`, and make sure the artwork is in `assets/mind-maps/` and the
+  blurred versions have been generated (see `assets/mind-maps/README.md`).
 - **To add a brand new map**, copy a whole line, paste it underneath, and give it a
   new `id` and `file` name that nothing else uses.
 
@@ -173,7 +207,8 @@ export const MIND_MAP_BUNDLE_AMOUNT = 900;
 | --- | --- | --- |
 | Yellow message: "Card payment on this site is being switched on" | `STRIPE_SECRET_KEY` is missing or the site has not been redeployed | Open `/api/setup-check`, then see [STRIPE-SETUP.md](STRIPE-SETUP.md) |
 | Buy buttons open Etsy instead of a payment page | Same as above | Open `/api/setup-check`, then see [STRIPE-SETUP.md](STRIPE-SETUP.md) |
-| "Preview image coming soon" on a card | The preview file is missing from `assets/mind-maps/` | Upload the preview image with the exact file name |
+| "Preview image coming soon" on a card | No blurred version exists for that file name | Add the artwork to `assets/mind-maps/`, then regenerate (see `assets/mind-maps/README.md`) |
+| A map is sharp and readable on Etsy or Shopify | That listing's photo was uploaded to them before, and lives on their servers | Replace it from `assets/listing-images/` — see the section above |
 | Customer says the download says "File not available yet" | You have not uploaded that map's full file yet | Do Step 2 for that map, then email them the file |
 | Bottom bar shows $10.00 for five maps | You are looking at an old cached page | Refresh the page with Ctrl+R (or Cmd+R) |
 
