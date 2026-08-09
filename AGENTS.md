@@ -25,6 +25,10 @@ No frontend framework and no bundler for the pages themselves.
 │   │                               #   download, setup-check
 │   └── database/migrations/        # Applied automatically by Netlify at deploy
 ├── db/                             # Drizzle schema + client for the order ledger
+├── scripts/
+│   ├── build-previews.mjs          # Burns blur + watermark into previews at deploy time
+│   └── font5x7.mjs                 # Bitmap font the watermark is drawn from
+├── assets/mind-maps/               # SOURCE artwork — never published as-is
 ├── netlify.toml
 ├── README.md
 └── AGENTS.md
@@ -46,8 +50,19 @@ No frontend framework and no bundler for the pages themselves.
 ## Non-Obvious Decisions
 
 - **Keep dependencies few and deliberate.** The site was originally dependency-free; npm exists now
-  only because payments and digital delivery require it (Stripe, Netlify Blobs, Netlify Database).
-  Hold that line — no bundlers, no CDN scripts, no UI libraries.
+  only because payments and digital delivery require it (Stripe, Netlify Blobs, Netlify Database),
+  and `sharp`, which runs at build time only to watermark previews. Hold that line — no bundlers,
+  no CDN scripts, no UI libraries.
+- **Preview protection is burned into the pixels at build time, never done in CSS.** The Netlify
+  build runs `scripts/build-previews.mjs`, which rewrites every file in `assets/mind-maps/` in the
+  disposable build workspace as a downscaled, blurred, watermarked copy, so the deploy only ever
+  contains protected images. Doing it in CSS — as the gallery once did — protects nothing: the rule
+  can be switched off in devtools, and it does not apply at all to the image's own URL or to a
+  `/.netlify/images?url=…&w=4000` request. For the same reason, do not add a lightbox or any
+  "view larger" affordance that reaches for a second, cleaner source. The watermark is drawn from a
+  hand-coded bitmap font (`scripts/font5x7.mjs`) rather than a typeface, because a build machine
+  with no fonts installed would silently render a blank watermark and publish naked artwork.
+  `--deploy` refuses to run unless git holds a clean copy of the artwork it is about to overwrite.
 - **Prices live only in `netlify/lib/catalog.ts` and `netlify/lib/mind-maps.ts`.** The browser posts
   product **ids** to `/api/checkout`; the server looks each one up and builds the Stripe line items.
   Never accept a price, name, or quantity from the client — that is the whole reason the storefront

@@ -138,4 +138,26 @@ because they share one source.
 There is no live API sync on purpose. Shopify and Etsy each require their own app credentials, and
 a background job that silently rewrites live listings is a far larger commitment than a file the
 shop owner reviews before uploading. The export image column points at the watermarked previews
-this site serves; swap in the full-resolution artwork on each channel.
+this site serves, which is what a listing gallery should show; the full-resolution artwork belongs
+in each channel's digital-delivery slot, not in its photo gallery.
+
+## Preview Protection
+
+`assets/mind-maps/` holds the source artwork, and none of it is published as-is. The Netlify build
+command runs `scripts/build-previews.mjs`, which rewrites each image in the disposable build
+workspace as a 900px, blurred copy with `ANESTHESIASTUDYCO.COM` tiled diagonally across it and a
+`PREVIEW` band through the middle. Because the degradation is in the pixels, it holds for a
+screenshot, a right-click save, a hotlink, and an Image CDN request at any width — none of which a
+CSS `filter` survives.
+
+The files buyers pay for are untouched by this: they live in the `digital-products` blob store and
+are served full-resolution and clean by `/api/download`.
+
+```bash
+npm run previews          # watermarked copies in preview-exports/, for Etsy and Shopify listings
+npm run previews:deploy   # what the build runs; overwrites assets/mind-maps in place
+```
+
+`previews:deploy` is destructive by design and refuses to run outside a Netlify build, or when git
+does not already hold a clean copy of the artwork it would overwrite. Blur strength and output size
+are set with the `PREVIEW_BLUR_SIGMA` and `PREVIEW_MAX_EDGE` environment variables.

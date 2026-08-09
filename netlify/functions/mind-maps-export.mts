@@ -15,8 +15,11 @@ import { siteOrigin } from "../lib/stripe.js";
  *   GET /api/mind-maps-export?format=shopify  → Shopify product import CSV
  *   GET /api/mind-maps-export?format=etsy     → listing worksheet for Etsy
  *
- * The image column points at the watermarked previews this site already serves.
- * Swap those for the full-resolution artwork before publishing listings.
+ * The image column points at the watermarked previews this site serves. Those are
+ * the right pictures for a listing gallery, and deliberately so: the previews are
+ * blurred and stamped at deploy time, so a shopper browsing Etsy or Shopify can
+ * see the topic without being handed the artwork. The clean full-resolution file
+ * belongs in each marketplace's digital-delivery slot, never in its photo gallery.
  */
 export default async (req: Request) => {
   const format = new URL(req.url).searchParams.get("format") ?? "shopify";

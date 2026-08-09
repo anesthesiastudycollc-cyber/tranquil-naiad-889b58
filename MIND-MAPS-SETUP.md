@@ -30,9 +30,15 @@ what is and is not configured.
 
 ## Step 2 — Upload the real mind map files
 
-The pictures on your website are watermarked previews. They are deliberately low
-quality so nobody can steal them. The **real, full-quality file** that a customer
-receives after paying has to be uploaded separately.
+The pictures on your website are previews. Every time the site publishes, it
+automatically shrinks each mind map, blurs it, and stamps
+`ANESTHESIASTUDYCO.COM` across it — so anyone who screenshots, saves, or hotlinks
+a preview walks away with a blurred, watermarked picture and nothing else. You do
+not have to prepare anything: put your normal artwork in `assets/mind-maps/` and
+the protection is applied for you.
+
+The **real, full-quality file** that a customer receives after paying is never
+watermarked, and it has to be uploaded separately.
 
 Each map has a file name like `mind-map-02.png`. The buyer of map 02 gets whatever
 you upload under that exact name.
@@ -113,8 +119,9 @@ you check it first.
 3. Go to your Shopify admin → **Products** → **Import**.
 4. Choose that file and click **Upload and continue**.
 5. Shopify shows you a preview. Check it, then click **Import products**.
-6. Afterwards, open a few products in Shopify and replace the preview image with
-   your full-quality artwork, and attach the digital file for delivery.
+6. The image column already points at your watermarked website previews, so the
+   listings are protected as soon as they import. Attach the full-quality file as
+   the digital download — and do **not** swap the listing photo for it.
 
 ### For Etsy
 
@@ -126,7 +133,34 @@ created in their form. So this is a worksheet rather than an import:
 2. Open the downloaded file in Excel, Numbers, or Google Sheets.
 3. Each row is one listing. Copy and paste the Title, Description, Price, and Tags
    columns into Etsy's **Add a listing** form.
-4. Upload your full-quality artwork and attach the digital file on Etsy's side.
+4. For the listing photos, use the watermarked previews — see "Getting watermarked
+   images to upload" below. Attach the full-quality artwork as the digital file
+   Etsy delivers after payment.
+
+### Getting watermarked images to upload
+
+Etsy and Shopify keep their own copies of listing photos, so they need the
+watermarked image files rather than a link to your site. On your own computer, in
+the project folder:
+
+```bash
+npm run previews
+```
+
+This creates a folder called `preview-exports` containing a blurred, watermarked
+version of every mind map, ready to upload as listing photos. It does not change
+your original artwork.
+
+If you want them blurrier or less blurry, run it like this instead — `4.5` is
+blurrier, `2` is lighter:
+
+```bash
+PREVIEW_BLUR_SIGMA=4.5 npm run previews
+```
+
+**The one rule for all three shops:** the watermarked picture is what shoppers
+see, and the clean full-quality file is what buyers get after paying. Never upload
+the clean file as a listing photo — that is the version people can screenshot.
 
 ---
 
