@@ -2,6 +2,7 @@ import { getStore } from "@netlify/blobs";
 import type { Config } from "@netlify/functions";
 import { PRODUCTS } from "../lib/catalog.js";
 import { MIND_MAP_PRODUCTS } from "../lib/mind-maps.js";
+import { etsyConfigured, shopifyConfigured, syncTokenConfigured } from "../lib/marketplaces.js";
 import { getStripe, stripeConfigured } from "../lib/stripe.js";
 
 /**
@@ -26,9 +27,44 @@ export default async () => {
   checks.push(await stripeKeyCheck());
   checks.push(downloadSecretCheck());
   checks.push(await productFileCheck());
+  checks.push(marketplaceCheck());
 
   return htmlPage(checks);
 };
+
+/**
+ * Whether the Etsy and Shopify photo sync can run.
+ *
+ * Reports presence only. A credential's value never appears here, and neither
+ * does the sync token — printing that would hand over the ability to rewrite the
+ * shop's listings to anyone who opened this page.
+ */
+function marketplaceCheck(): Check {
+  const missing: string[] = [];
+  if (!syncTokenConfigured()) missing.push("MARKETPLACE_SYNC_TOKEN");
+  if (!etsyConfigured()) missing.push("ETSY_API_KEY, ETSY_REFRESH_TOKEN, ETSY_SHOP_ID");
+  if (!shopifyConfigured()) missing.push("SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_TOKEN");
+
+  if (missing.length === 0) {
+    return {
+      level: "ok",
+      title: "Etsy and Shopify photos can be blurred automatically",
+      detail:
+        "Both marketplaces are connected. Open /api/marketplace-sync with your sync token to see " +
+        "which listings would change, then apply it. Nothing is changed until you press the button.",
+    };
+  }
+
+  return {
+    level: "warn",
+    title: "Etsy and Shopify photos have to be replaced by hand",
+    detail:
+      "This site's own images and the payment page are already blurred; a listing on Etsy or " +
+      "Shopify shows a photo stored on their servers, which only their API can change. Still to " +
+      `set in Netlify: ${missing.join("; ")}. Until then, replace those photos yourself from ` +
+      "assets/listing-images/ — see MIND-MAPS-SETUP.md.",
+  };
+}
 
 async function stripeKeyCheck(): Promise<Check> {
   if (!stripeConfigured()) {

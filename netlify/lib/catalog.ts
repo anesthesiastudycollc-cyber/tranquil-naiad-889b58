@@ -36,6 +36,13 @@ export type Product = {
   format: string;
   highlights: string[];
   delivery: Delivery;
+  /**
+   * Site-relative path to the blurred, watermarked preview for this product, if
+   * it has artwork. Only ever a file from `assets/previews/` — this URL is handed
+   * to Stripe, which fetches it and shows it on the hosted checkout page, so it
+   * must never point at anything a customer has not paid for yet.
+   */
+  previewImage?: string;
   featured?: boolean;
 };
 

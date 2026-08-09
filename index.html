@@ -266,7 +266,14 @@
     aspect-ratio:1/1;background:var(--cream-2);overflow:hidden;position:relative;
     border-bottom:1px solid var(--line);
   }
-  .mm-card .thumb img{width:100%;height:100%;object-fit:contain;padding:10px;}
+  /* These previews are blurred and watermarked in the file itself (see
+     scripts/generate-previews.mjs) — they were previously hot-linked sharp from
+     the Shopify CDN, which put the readable artwork on the home page. Nothing
+     here is protection; it only stops the image being dragged out casually. */
+  .mm-card .thumb img{
+    width:100%;height:100%;object-fit:contain;padding:10px;
+    user-select:none;-webkit-user-drag:none;pointer-events:none;
+  }
   .mm-card .body{padding:16px 18px 20px;display:flex;flex-direction:column;flex-grow:1;}
   .mm-card h4{font-size:15.5px;font-family:var(--sans);font-weight:700;color:var(--navy);margin-bottom:6px;line-height:1.35;min-height:42px;}
   .mm-card .tag{font-size:11.5px;text-transform:uppercase;letter-spacing:1px;color:var(--gold-dark);font-weight:700;margin-bottom:10px;}
@@ -610,7 +617,7 @@
     <div class="mm-grid">
 
       <div class="mm-card">
-        <div class="thumb"><img src="https://cdn.shopify.com/s/files/1/0753/6807/1341/files/04ACLS.png?v=1785979717" alt="ACLS anesthesia mind map thumbnail" loading="lazy"></div>
+        <div class="thumb"><img src="/assets/previews/featured-acls.png" alt="ACLS anesthesia mind map preview, blurred" loading="lazy"></div>
         <div class="body">
           <span class="tag">Crisis Management</span>
           <h4>ACLS — Anesthesia Mind Map</h4>
@@ -622,7 +629,7 @@
       </div>
 
       <div class="mm-card">
-        <div class="thumb"><img src="https://cdn.shopify.com/s/files/1/0753/6807/1341/files/70EKG_4afd5b02-19d7-4f9b-b5fd-cbe084290034.png?v=1785981973" alt="Anesthesia EKG review mind map thumbnail" loading="lazy"></div>
+        <div class="thumb"><img src="/assets/previews/featured-ekg.png" alt="Anesthesia EKG review mind map preview, blurred" loading="lazy"></div>
         <div class="body">
           <span class="tag">Cardiac</span>
           <h4>Anesthesia EKG Review — Mind Map</h4>
@@ -634,7 +641,7 @@
       </div>
 
       <div class="mm-card">
-        <div class="thumb"><img src="https://cdn.shopify.com/s/files/1/0753/6807/1341/files/MI_9feb90d8-2156-473a-b832-a619c632be4d.png?v=1785982335" alt="Myocardial infarction anesthesia mind map thumbnail" loading="lazy"></div>
+        <div class="thumb"><img src="/assets/previews/featured-mi.png" alt="Myocardial infarction anesthesia mind map preview, blurred" loading="lazy"></div>
         <div class="body">
           <span class="tag">Cardiac</span>
           <h4>Myocardial Infarction — Mind Map</h4>
@@ -646,7 +653,7 @@
       </div>
 
       <div class="mm-card">
-        <div class="thumb"><img src="https://cdn.shopify.com/s/files/1/0753/6807/1341/files/43PulmonaryEmbolism.png?v=1785982494" alt="Pulmonary embolism anesthesia mind map thumbnail" loading="lazy"></div>
+        <div class="thumb"><img src="/assets/previews/featured-pe.png" alt="Pulmonary embolism anesthesia mind map preview, blurred" loading="lazy"></div>
         <div class="body">
           <span class="tag">Pulmonary</span>
           <h4>Pulmonary Embolism — Mind Map</h4>
@@ -658,7 +665,7 @@
       </div>
 
       <div class="mm-card">
-        <div class="thumb"><img src="https://cdn.shopify.com/s/files/1/0753/6807/1341/files/46Hypooxia_148fb7b2-fdf3-4b40-99c6-a5b324b26758.png?v=1785982223" alt="Hypoxia anesthesia mind map thumbnail" loading="lazy"></div>
+        <div class="thumb"><img src="/assets/previews/featured-hypoxia.png" alt="Hypoxia anesthesia mind map preview, blurred" loading="lazy"></div>
         <div class="body">
           <span class="tag">Pulmonary</span>
           <h4>Hypoxia — Anesthesia Mind Map</h4>
@@ -670,7 +677,7 @@
       </div>
 
       <div class="mm-card">
-        <div class="thumb"><img src="https://cdn.shopify.com/s/files/1/0753/6807/1341/files/58Bronchospasm.png?v=1785982161" alt="Bronchospasm anesthesia mind map thumbnail" loading="lazy"></div>
+        <div class="thumb"><img src="/assets/previews/featured-bronchospasm.png" alt="Bronchospasm anesthesia mind map preview, blurred" loading="lazy"></div>
         <div class="body">
           <span class="tag">Pulmonary</span>
           <h4>Bronchospasm — Mind Map</h4>
@@ -682,7 +689,7 @@
       </div>
 
       <div class="mm-card">
-        <div class="thumb"><img src="https://cdn.shopify.com/s/files/1/0753/6807/1341/files/HemodynamicsMonitoring.png?v=1785982365" alt="Hemodynamic monitoring anesthesia mind map thumbnail" loading="lazy"></div>
+        <div class="thumb"><img src="/assets/previews/featured-hemodynamics.png" alt="Hemodynamic monitoring anesthesia mind map preview, blurred" loading="lazy"></div>
         <div class="body">
           <span class="tag">Physiology</span>
           <h4>Hemodynamic Monitoring — Mind Map</h4>
@@ -694,7 +701,7 @@
       </div>
 
       <div class="mm-card">
-        <div class="thumb"><img src="https://cdn.shopify.com/s/files/1/0753/6807/1341/files/49Ephedrine.png?v=1785982432" alt="Ephedrine anesthesia mind map thumbnail" loading="lazy"></div>
+        <div class="thumb"><img src="/assets/previews/featured-ephedrine.png" alt="Ephedrine anesthesia mind map preview, blurred" loading="lazy"></div>
         <div class="body">
           <span class="tag">Pharmacology</span>
           <h4>Ephedrine — Anesthesia Mind Map</h4>

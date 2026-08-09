@@ -7,3 +7,35 @@
 
 [functions]
   directory = "netlify/functions"
+
+# The full-resolution mind map artwork lives in `assets/mind-maps/`, which the
+# site publishes, so every file in it used to be one guessable URL away from being
+# downloaded for free — the blur on the gallery was a CSS filter applied after the
+# sharp image had already reached the browser.
+#
+# This rewrite serves the blurred, watermarked derivative from `assets/previews/`
+# whenever the original path is requested, so the untouched artwork is no longer
+# reachable over HTTP. It is a rewrite rather than a redirect so that listing
+# images already published elsewhere under the old URL keep working — they simply
+# start returning the protected version. `force` is required: without it Netlify
+# serves the static file that exists at this path and ignores the rule.
+#
+# It also fails safe: a file with no generated preview 404s here rather than
+# falling through to the original, so forgetting to regenerate cannot leak art.
+[[redirects]]
+  from = "/assets/mind-maps/*"
+  to = "/assets/previews/:splat"
+  status = 200
+  force = true
+
+# Both derivative folders only change when artwork is regenerated, and there is
+# nothing sensitive left in them, so they are safe to sit in browser caches.
+[[headers]]
+  for = "/assets/previews/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+
+[[headers]]
+  for = "/assets/listing-images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"

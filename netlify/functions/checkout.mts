@@ -78,6 +78,10 @@ export default async (req: Request) => {
           product_data: {
             name: product.name,
             description: product.format,
+            // Stripe fetches this and renders it on the hosted checkout page, so
+            // it is always the blurred, watermarked preview — the checkout page
+            // is seen before payment, and previously showed no image at all.
+            ...(product.previewImage ? { images: [`${origin}${product.previewImage}`] } : {}),
             // Read back during fulfilment to map a paid line item to a catalog entry.
             metadata: { product_id: product.id },
           },

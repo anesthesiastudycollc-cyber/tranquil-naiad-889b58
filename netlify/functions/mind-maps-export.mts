@@ -7,14 +7,27 @@ import { siteOrigin } from "../lib/stripe.js";
  *
  * The website, Shopify, and Etsy all end up describing the same maps at the same
  * price because all three are generated from `netlify/lib/mind-maps.ts`. Editing
- * that one list and re-exporting is what keeps the channels in step — there is no
- * live API sync here, deliberately: Shopify and Etsy each need their own app
- * credentials, and a scheduled push that silently edits live listings is a much
- * bigger commitment than a file the shop owner reviews before uploading.
+ * that one list and re-exporting is what keeps the channels in step.
  *
  *   GET /api/mind-maps-export?format=shopify  → Shopify product import CSV
  *   GET /api/mind-maps-export?format=etsy     → listing worksheet for Etsy
  *
+ * The image column points at `assets/listing-images/` — the 2000px blurred,
+ * watermarked versions, at the size Etsy asks for. Do not swap them for the
+ * full-resolution artwork: a marketplace listing image is public to everyone who
+ * browses the category, whether or not they ever buy, so a sharp listing image
+ * gives the product away. The buyer gets the full file after checkout.
+ *
+ * Note what this export can and cannot do. It sets the image on listings created
+ * *from* it. A listing already live on Etsy or Shopify shows a file that was
+ * uploaded to that marketplace when it was created, hosted by them — nothing this
+ * site serves can reach it. Fixing those is `/api/marketplace-sync`, which writes
+ * the blurred image through each marketplace's API; this export covers only new
+ * listings.
+ *
+ * Keep the SKU column as the map id. `/api/marketplace-sync` matches a live
+ * listing back to a map by SKU, and falls back to fuzzy title matching only when
+ * the SKU is absent.
  * The image column points at the square listing crops this site serves from
  * `/assets/mind-maps/listing/`. Those are the right pictures for a marketplace
  * gallery, and deliberately so: they are blurred, stamped, and cropped to the
@@ -154,6 +167,17 @@ function etsyCsv(origin: string): string {
   ]);
 
   return toCsv(columns, rows);
+}
+
+/**
+ * The 2000px blurred, watermarked version of a map, as an absolute URL.
+ *
+ * Marketplace listing images are seen by everyone browsing a category, not just
+ * buyers, so this never resolves to `assets/mind-maps/` — that path holds the
+ * artwork and is not served at all.
+ */
+function listingImage(origin: string, file: string): string {
+  return `${origin}/assets/listing-images/${file.replace(/\.png$/i, ".jpg")}`;
 }
 
 function handleFor(title: string, id: string): string {

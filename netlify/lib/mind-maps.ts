@@ -11,9 +11,13 @@ import type { Product } from "./catalog.js";
  * Editing this list is the only thing needed to add, rename, or retire a map:
  * the browsing page, card checkout, and the Shopify/Etsy exports all read it.
  *
- *   file       Preview image in assets/mind-maps/ — watermarked and low-resolution,
- *              because anything in that folder is publicly downloadable. The
- *              full-resolution file the buyer receives lives in the
+ *   file       Artwork file name. The source lives in assets/mind-maps/, which is
+ *              NOT served — netlify.toml rewrites that path to the blurred,
+ *              watermarked derivative of the same name in assets/previews/, which
+ *              is what the gallery and Stripe checkout show. The 2000px versions
+ *              in assets/listing-images/ are what gets uploaded to Etsy and
+ *              Shopify. Run scripts/generate-previews.mjs after changing artwork.
+ *              The full-resolution file the buyer receives lives in the
  *              `digital-products` blob store under the same name.
  *   title      Shown on the card and used to name the downloaded file.
  *   published  false hides a slot that has no artwork yet, or whose artwork
@@ -256,6 +260,9 @@ function toProduct(map: MindMap): Product {
       filename: `${slugify(map.title)}-Mind-Map.png`,
       contentType: "image/png",
     },
+    // Deliberately the blurred derivative, not `assets/mind-maps/${map.file}`.
+    // Checkout shows this to someone who has not paid yet.
+    previewImage: `/assets/previews/${map.file}`,
   };
 }
 
