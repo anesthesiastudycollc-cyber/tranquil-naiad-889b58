@@ -169,14 +169,6 @@ function etsyCsv(origin: string): string {
   return toCsv(columns, rows);
 }
 
-/**
- * The 2000px blurred, watermarked version of a map, as an absolute URL.
- *
- * Marketplace listing images are seen by everyone browsing a category, not just
- * buyers, so this never resolves to `assets/mind-maps/` — that path holds the
- * artwork and is not served at all.
- */
-
 function handleFor(title: string, id: string): string {
   const slug = title
     .normalize("NFKD")
