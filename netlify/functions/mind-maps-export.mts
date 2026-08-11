@@ -16,7 +16,7 @@ import { siteOrigin } from "../lib/stripe.js";
  *   GET /api/mind-maps-export?format=shopify  → Shopify product import CSV
  *   GET /api/mind-maps-export?format=etsy     → listing worksheet for Etsy
  *
- * The image column points at `assets/listing-images/` — the 2000px blurred,
+ * The image column points at `assets/listing-images/` — the blurred, low-resolution
  * watermarked versions, at the size Etsy asks for. Do not swap them for the
  * full-resolution artwork: a marketplace listing image is public to everyone who
  * browses the category, whether or not they ever buy, so a sharp listing image

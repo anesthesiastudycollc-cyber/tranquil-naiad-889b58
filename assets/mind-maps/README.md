@@ -13,8 +13,8 @@ download, so leave it in place.
 | Folder | Contents | Public? |
 | --- | --- | --- |
 | `assets/mind-maps/` | Artwork exactly as exported. Source only. | No — rewritten to the preview |
-| `assets/previews/` | Generated: 560px, blurred, watermark burned in | Yes — what this website shows |
-| `assets/listing-images/` | Generated: 2000px, blurred, watermark burned in | Yes — what you upload to Etsy and Shopify |
+| `assets/previews/` | Generated: 360px, blurred, watermark burned in | Yes — what this website shows |
+| `assets/listing-images/` | Generated: 1000px (or whatever keeps the short edge at 700px), blurred, watermark burned in | Yes — what you upload to Etsy and Shopify |
 
 The two generated folders are never edited by hand. Everything public reads from
 them: the gallery on `/mind-maps.html`, the eight cards on the landing page, the
@@ -61,7 +61,7 @@ folder and publishes two protected versions of it:
 
 **The gallery preview**, in place of the original file, for `/mind-maps.html`:
 
-- scaled down to 900px on the long edge
+- scaled down to 560px on the long edge
 - blurred, so the fine print cannot be read
 - watermarked with `ANESTHESIASTUDYCO.COM` repeated diagonally across the whole
   image, plus a `PREVIEW` band through the middle
@@ -69,7 +69,7 @@ folder and publishes two protected versions of it:
 **The marketplace listing photo**, written to `listing/` alongside it, for Etsy
 and Shopify:
 
-- a square 1200px crop of the *middle* of the map, so the outer edges of the
+- a square 800px crop of the *middle* of the map, so the outer edges of the
   layout are never shown
 - blurred harder to match, because a crop is magnified — the same amount of
   detail is hidden at either size

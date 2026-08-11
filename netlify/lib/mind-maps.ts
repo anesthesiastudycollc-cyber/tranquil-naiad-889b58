@@ -14,7 +14,7 @@ import type { Product } from "./catalog.js";
  *   file       Artwork file name. The source lives in assets/mind-maps/, which is
  *              NOT served — netlify.toml rewrites that path to the blurred,
  *              watermarked derivative of the same name in assets/previews/, which
- *              is what the gallery and Stripe checkout show. The 2000px versions
+ *              is what the gallery and Stripe checkout show. The larger versions
  *              in assets/listing-images/ are what gets uploaded to Etsy and
  *              Shopify. Run scripts/generate-previews.mjs after changing artwork.
  *              The full-resolution file the buyer receives lives in the
@@ -228,8 +228,9 @@ export const MIND_MAPS: MindMap[] = [
 export const PUBLISHED_MIND_MAPS: MindMap[] = MIND_MAPS.filter((map) => map.published);
 
 /**
- * The blurred, watermarked 2000px JPEG for a map, as an absolute URL — the one
- * picture of a map this site is willing to show a marketplace shopper.
+ * The blurred, watermarked, deliberately low-resolution JPEG for a map, as an
+ * absolute URL — the one picture of a map this site is willing to show a
+ * marketplace shopper.
  *
  * Every marketplace surface resolves its image through here so the sheet the
  * owner uploads and the photo `/api/marketplace-sync` pushes are the same file.

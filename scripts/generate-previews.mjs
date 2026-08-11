@@ -15,8 +15,8 @@
  *
  * Two sizes come out of it:
  *
- *   assets/previews/        560px PNG  — what this website serves
- *   assets/listing-images/  2000px JPG — what gets uploaded to Etsy and Shopify
+ *   assets/previews/        360px PNG  — what this website serves
+ *   assets/listing-images/  1000px JPG — what gets uploaded to Etsy and Shopify
  *
  * The second set exists because a marketplace listing image is a file the seller
  * uploads to the marketplace; nothing this site serves can change a listing that
@@ -46,11 +46,37 @@ const SOURCE_DIR = path.join(ROOT, "assets", "mind-maps");
 const PREVIEW_DIR = path.join(ROOT, "assets", "previews");
 const LISTING_DIR = path.join(ROOT, "assets", "listing-images");
 
-/** Longest edge of a web preview, in pixels. Displayed at ~300px wide. */
-const PREVIEW_WIDTH = 560;
+/**
+ * Longest edge of a web preview, in pixels. Displayed at ~300px wide, so this is
+ * barely more than one device pixel per CSS pixel and nothing about it survives
+ * being enlarged.
+ *
+ * It used to be 560, which gave a screenshot of the gallery roughly twice the
+ * detail the card needed and made the grab worth taking. Sizing the file to the
+ * card instead means the best copy anyone can walk away with — right-click,
+ * screenshot, or Image CDN request at any width — is a thumbnail.
+ */
+const PREVIEW_WIDTH = 360;
 
-/** Etsy asks for 2000px on the shortest side for listing photos. */
-const LISTING_WIDTH = 2000;
+/**
+ * Longest edge of a marketplace listing photo, in pixels.
+ *
+ * Etsy asks for 2000px and demotes a first photo below 635px in search, so this
+ * sits deliberately between the two: comfortably clear of the ranking floor,
+ * while giving a shopper who screenshots the listing a fraction of the pixels
+ * the old 2000px upload handed over. Etsy re-encodes and downscales for display
+ * anyway, so the listing still looks like a listing.
+ */
+const LISTING_WIDTH = 1000;
+
+/**
+ * ...but the ranking floor applies to *both* edges, and these maps are wide. A
+ * flat 1000px width puts a 16:9 map at about 560px tall, which is under it. So
+ * a wide map is given whatever width lands its short edge here instead, and only
+ * a squarer one comes out at LISTING_WIDTH. Cutting resolution should cost the
+ * shop screenshots, not search placement.
+ */
+const LISTING_MIN_SHORT_EDGE = 700;
 
 /**
  * Blur radius as a fraction of image width, so both sizes are obscured to the
@@ -148,19 +174,35 @@ async function obscure(input, targetWidth) {
 async function writePreview(input, name) {
   const image = await obscure(input, PREVIEW_WIDTH);
   // Blurred images are almost all gradient, so a palette costs no visible
-  // quality and keeps the committed previews small.
-  const buffer = await image.png({ palette: true, quality: 70, compressionLevel: 9 }).toBuffer();
+  // quality and keeps the committed previews small. The low quality number is
+  // also part of the point: banding and mush are what a screenshot inherits.
+  const buffer = await image.png({ palette: true, quality: 55, compressionLevel: 9 }).toBuffer();
   await writeFile(path.join(PREVIEW_DIR, `${name}.png`), buffer);
   return buffer.length;
 }
 
 async function writeListingImage(input, name) {
-  const image = await obscure(input, LISTING_WIDTH);
-  // JPEG at this size: marketplaces re-encode anyway, and a blurred 2000px PNG
-  // would be several megabytes for no benefit.
-  const buffer = await image.jpeg({ quality: 82, mozjpeg: true }).toBuffer();
+  const image = await obscure(input, await listingWidth(input));
+  // JPEG at this size: marketplaces re-encode anyway, and a blurred 1000px PNG
+  // would be several megabytes for no benefit. Quality is kept low on purpose —
+  // the artefacts cost a blurred image nothing a shopper can see and cost a
+  // screenshot the last of its detail.
+  const buffer = await image.jpeg({ quality: 60, mozjpeg: true }).toBuffer();
   await writeFile(path.join(LISTING_DIR, `${name}.jpg`), buffer);
   return buffer.length;
+}
+
+/**
+ * The width to render a listing photo at: LISTING_WIDTH unless the map is wide
+ * enough that doing so would push its short edge under LISTING_MIN_SHORT_EDGE.
+ * Reading the header is cheap — sharp does not decode the pixels for this.
+ */
+async function listingWidth(input) {
+  const { width, height } = await sharp(input).metadata();
+  if (!width || !height) return LISTING_WIDTH;
+
+  const forShortEdge = Math.ceil(LISTING_MIN_SHORT_EDGE * (width / Math.min(width, height)));
+  return Math.max(LISTING_WIDTH, forShortEdge);
 }
 
 async function main() {
