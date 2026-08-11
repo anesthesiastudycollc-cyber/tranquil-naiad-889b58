@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Digital Store — Anesthesia Study Co. LLC</title>
-  <meta name="description" content="Buy anesthesia study guides, printable one-pagers, mind maps, and interactive anesthesia apps. Pay by card and download instantly.">
+  <meta name="description" content="Buy anesthesia study guides, printable cram sheets and quick references, mind maps, and interactive anesthesia resources. Pay by card and download instantly.">
 
   <script>function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"5bcf70c70b90b0cb12a614281ae98661"})});</script>
 
@@ -448,7 +448,7 @@
   <section class="card">
     <h2>Digital store</h2>
     <p>
-      Pick the study guides, one-pagers, mind maps, and interactive apps you want, pay securely by card,
+      Pick the study guides, cram sheets, mind maps, and interactive resources you want, pay securely by card,
       and download everything on the next screen. Nothing ships and nothing waits for approval.
     </p>
     <ul class="promises">
@@ -719,10 +719,14 @@
       state.categories = data.categories || [];
       state.checkoutEnabled = Boolean(data.checkoutEnabled);
 
-      // Landing-page buttons deep-link to a category, e.g. store.html#one-pagers.
+      // Landing-page buttons deep-link to a category, e.g. store.html#cram-sheets.
       // The catalog is rendered client-side, so the hash is resolved here rather
-      // than by the browser.
+      // than by the browser. A renamed category keeps its old anchor working
+      // through the alias table the catalog ships with — #one-pagers has been
+      // linked and bookmarked since before the category was called cram sheets.
+      var aliases = data.categoryAliases || {};
       var requested = window.location.hash.replace("#", "");
+      if (aliases[requested]) requested = aliases[requested];
       var matched = state.categories.some(function (category) { return category.id === requested; });
       if (matched) state.filter = requested;
 
