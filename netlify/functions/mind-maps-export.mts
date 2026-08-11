@@ -176,8 +176,6 @@ function etsyCsv(origin: string): string {
  * buyers, so this never resolves to `assets/mind-maps/` — that path holds the
  * artwork and is not served at all.
  */
-function listingImage(origin: string, file: string): string {
-  return `${origin}/assets/listing-images/${file.replace(/\.png$/i, ".jpg")}`;
 }
 
 function handleFor(title: string, id: string): string {
