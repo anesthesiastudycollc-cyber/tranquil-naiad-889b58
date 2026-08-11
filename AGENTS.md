@@ -18,6 +18,7 @@ No frontend framework and no bundler for the pages themselves.
 │   ├── lib/
 │   │   ├── catalog.ts              # SOURCE OF TRUTH for products and prices
 │   │   ├── mind-maps.ts            # SOURCE OF TRUTH for the individual mind maps
+│   │   ├── stripe-price-map.ts     # Generated internal id → Stripe product/price ids
 │   │   ├── stripe.ts               # Stripe client + not-configured handling
 │   │   ├── marketplaces.ts         # Etsy/Shopify credentials, token refresh, API clients
 │   │   ├── marketplace-sync.ts     # Matches live listings to maps, replaces their photos
@@ -35,6 +36,8 @@ No frontend framework and no bundler for the pages themselves.
 ├── db/                             # Drizzle schema + client for the order ledger
 ├── scripts/
 │   ├── build-previews.mjs          # Burns blur + watermark into previews at deploy time
+│   ├── reconcile-catalog.mjs       # Read-only website ↔ Stripe ↔ Etsy master table
+│   ├── ts-js-resolve.mjs           # Lets plain node scripts import the .ts libs
 │   └── font5x7.mjs                 # Bitmap font the watermark is drawn from
 ├── assets/mind-maps/               # SOURCE artwork — never published as-is
 ├── netlify.toml
@@ -124,6 +127,31 @@ No frontend framework and no bundler for the pages themselves.
 - **Mind maps are catalog products that skip the catalog listing.** `mind-maps.ts` products resolve
   through `getProduct()` so checkout, fulfilment, and download treat them normally, but they are
   excluded from `publicCatalog()` — 89 two-dollar items would bury the study guides on `store.html`.
+- **Storefront categories mirror how the shop describes itself, not how the files are formatted.**
+  `CATEGORIES` is Mind Maps, Study Guides, Cram Sheets & Quick References, Bundles, Interactive
+  Resources, in that order, because that is the vocabulary the Etsy shop and the owner already use.
+  The earlier `one-pagers` / `interactive-apps` ids were a file-format taxonomy, which is why a
+  one-page cram sheet had nowhere obvious to go and simply never got added.
+- **`published` hides a product from the storefront; it never revokes a download.**
+  `publicCatalog()` filters on it, but `getProduct()` deliberately ignores it, because a signed
+  download link embeds the product id and stays valid for 30 days — un-publishing a product must not
+  break the link of someone who bought it last week. For the same reason **product ids are
+  append-only**: renaming `onepager-induction` would invalidate every outstanding token for it and
+  orphan its Stripe mapping. Add a record, retire a record, never rename one.
+- **Stripe ids live in `netlify/lib/stripe-price-map.ts`, not in the product records.** The
+  reconciliation table shows a Stripe product and price per internal id, but the generated map is
+  the only file that stores them; two files claiming to own the same mapping is how they drift
+  apart. Checkout does not read the map at all — it prices from the catalog and lets Stripe create
+  the line items — so a stale entry there cannot mis-charge anyone.
+- **`scripts/reconcile-catalog.mjs` is the answer to "why isn't this on the website?".** The site,
+  Stripe, and Etsy are three separate inventories, and a product added to one is invisible to the
+  others; the script builds one master row per internal id and reports the gaps both ways. It is
+  read-only on purpose — it names what is out of step and leaves the editing to a person. Its Etsy
+  leg takes an exported listings file rather than calling the API, because Etsy rotates the refresh
+  token on every use and the live one is kept in the `marketplace-tokens` blob store: a script
+  refreshing from outside that store would silently break `/api/marketplace-sync`.
+  `scripts/ts-js-resolve.mjs` exists only so a plain node script can import the `.ts` libraries
+  despite their `.js` import specifiers.
 - **The 5-for-$9 mind map saving is applied as a Stripe discount, not a bundle line item.** Each map
   stays its own $2 line so a paid line always names exactly one product, which is what fulfilment
   reads to decide download entitlement. A bundle line item would cover five products at once and
@@ -159,9 +187,12 @@ No frontend framework and no bundler for the pages themselves.
 - **Product files are not in the repo.** They live in the `digital-products` Netlify Blobs store,
   keyed by each catalog entry's `blobKey`. A missing file yields a clear support message after a
   successful payment rather than a hard error.
-- **Category deep-links** (`store.html#one-pagers`) are resolved in JavaScript after the catalog
+- **Category deep-links** (`store.html#cram-sheets`) are resolved in JavaScript after the catalog
   fetch, because the product sections do not exist in the initial HTML. Adding a category to
-  `CATEGORIES` makes its anchor work automatically.
+  `CATEGORIES` makes its anchor work automatically. Renaming one does not break the old anchor:
+  `CATEGORY_ALIASES` in `catalog.ts` maps the retired id to the current one and ships in the
+  `/api/catalog` payload, so `#one-pagers` and `#interactive-apps` — printed on cards, in emails,
+  and on marketplace listings we cannot edit — still land on the right section.
 - **Privacy policy effective date** is currently `2026-07-25`, bumped when on-site card payments were
   added. Update it manually whenever the policy content changes.
 - **Apple Support URL** points to `https://anesthesiastudyco.com/#support` — required for iOS App

@@ -259,6 +259,9 @@ function toProduct(map: MindMap): Product {
     id: map.id,
     name: `${map.title} Mind Map`,
     categoryId: "mind-maps",
+    // Only published slots ever reach here, and these are excluded from the
+    // store listing by publicCatalog() rather than by this flag.
+    published: true,
     unitAmount: MIND_MAP_UNIT_AMOUNT,
     currency: "usd",
     description: `A single-page visual map of ${map.title} — the whole topic laid out in one view so the connections between its parts are the point.`,

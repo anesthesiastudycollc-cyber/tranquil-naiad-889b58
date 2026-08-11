@@ -5,7 +5,7 @@ A marketing website and digital storefront for **Anesthesia Study Co. LLC**, an 
 ## What It Is
 
 - **index.html** — Landing page with hero, purchase buttons, app overview, marketplace links, social, about, and support sections
-- **store.html** — Digital store: pick study guides, one-pagers, mind maps, interactive apps, or bundles and pay by card
+- **store.html** — Digital store: pick mind maps, study guides, cram sheets and quick references, bundles, or interactive resources and pay by card
 - **mind-maps.html** — The individual mind map collection: browse previews, buy one for $2.00 or any five for $9.00, and pay by card on site
 - **thank-you.html** — Post-payment page that unlocks every purchased file immediately
 - **privacy.html** — Privacy policy page (required for the Apple App Store support URL)
@@ -94,9 +94,31 @@ from sale.
 Prices are **only** read from these files, server-side. The browser sends product ids to
 `/api/checkout` and never a price, so a tampered request cannot change what is charged.
 
-To add a product: append an entry to `PRODUCTS`, then upload its file under the `blobKey` you chose.
-To add a category: append to `CATEGORIES` and use its `id` as the `categoryId` on products. Landing
-page buttons can deep-link to any category, e.g. `store.html#one-pagers`.
+The storefront sections are Mind Maps, Study Guides, Cram Sheets & Quick References, Bundles, and
+Interactive Resources — the same way the shop describes itself on Etsy, so a product is filed in one
+obvious place rather than in whichever category matched the file format.
+
+To add a product: append an entry to `PRODUCTS` with a stable internal id (`cram-renal-diuretics`,
+never an Etsy listing number or a slug of the title), then upload its file under the `blobKey` you
+chose. `published: false` keeps a record in the catalog but off the storefront, which is how a
+product is staged before its file exists. To add a category: append to `CATEGORIES` and use its `id`
+as the `categoryId` on products. Landing page buttons can deep-link to any category, e.g.
+`store.html#cram-sheets`; a renamed category keeps its old anchor alive through `CATEGORY_ALIASES`.
+
+### Reconciling the three catalogs
+
+The website, Stripe, and Etsy are separate inventories — adding a product to Etsy does not add it to
+this site. `scripts/reconcile-catalog.mjs` builds one master table across all three, keyed by the
+internal id, and reports what is missing where:
+
+```bash
+node scripts/reconcile-catalog.mjs --out reconciliation.csv          # website + Stripe
+node scripts/reconcile-catalog.mjs --etsy-file etsy-listings.json    # all three
+```
+
+It is read-only and changes nothing. The Etsy leg takes an export file rather than calling the API
+on purpose: Etsy rotates the refresh token on every use and the site stores the rotated value, so a
+script refreshing from outside that store would quietly break `/api/marketplace-sync`.
 
 ## How a Purchase Works
 
