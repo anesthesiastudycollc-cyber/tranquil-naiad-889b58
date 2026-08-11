@@ -176,7 +176,6 @@ function etsyCsv(origin: string): string {
  * buyers, so this never resolves to `assets/mind-maps/` — that path holds the
  * artwork and is not served at all.
  */
-}
 
 function handleFor(title: string, id: string): string {
   const slug = title
