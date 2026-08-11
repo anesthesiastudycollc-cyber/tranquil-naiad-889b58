@@ -20,7 +20,7 @@
  *      is not recoverable from here. `scope: "all"` opts into the rest.
  */
 
-import { PUBLISHED_MIND_MAPS, type MindMap } from "./mind-maps.js";
+import { listingImageUrl, PUBLISHED_MIND_MAPS, type MindMap } from "./mind-maps.js";
 import {
   ETSY_API,
   etsyAccessToken,
@@ -117,11 +117,6 @@ function matchListing(
     map: null,
     reason: "no published mind map has this SKU or title — set the listing's SKU to the map id (e.g. map-05)",
   };
-}
-
-/** The blurred, watermarked 2000px JPEG for a map, as an absolute URL. */
-export function listingImageUrl(origin: string, map: MindMap): string {
-  return `${origin}/assets/listing-images/${map.file.replace(/\.png$/i, ".jpg")}`;
 }
 
 async function fetchListingImage(origin: string, map: MindMap): Promise<Blob> {

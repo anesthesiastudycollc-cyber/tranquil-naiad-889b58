@@ -228,6 +228,20 @@ export const MIND_MAPS: MindMap[] = [
 export const PUBLISHED_MIND_MAPS: MindMap[] = MIND_MAPS.filter((map) => map.published);
 
 /**
+ * The blurred, watermarked 2000px JPEG for a map, as an absolute URL — the one
+ * picture of a map this site is willing to show a marketplace shopper.
+ *
+ * Every marketplace surface resolves its image through here so the sheet the
+ * owner uploads and the photo `/api/marketplace-sync` pushes are the same file.
+ * Deliberately not `/assets/mind-maps/...`: netlify.toml rewrites that whole
+ * path to `assets/previews/`, so anything under it that has no same-named
+ * preview 404s — which is exactly what a marketplace image column must not do.
+ */
+export function listingImageUrl(origin: string, map: MindMap): string {
+  return `${origin}/assets/listing-images/${map.file.replace(/\.png$/i, ".jpg")}`;
+}
+
+/**
  * ASCII filename slug. NFKD first so typographic characters in titles survive as
  * something readable — "Nitrous Oxide (N₂O)" becomes "Nitrous-Oxide-N2O" rather
  * than losing the subscript, which matters because the slug is sent back to the

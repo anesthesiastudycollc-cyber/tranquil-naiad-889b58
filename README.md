@@ -137,10 +137,13 @@ because they share one source.
 
 There is no live API sync on purpose. Shopify and Etsy each require their own app credentials, and
 a background job that silently rewrites live listings is a far larger commitment than a file the
-shop owner reviews before uploading. The export image column points at the square listing crops
-under `/assets/mind-maps/listing/` rather than the wide gallery previews, so a marketplace photo
-shows the subject and style of a map without showing how its whole layout is arranged. The
+shop owner reviews before uploading. The export image column points at the blurred, watermarked
+2000px JPEGs under `/assets/listing-images/` — the same file `/api/marketplace-sync` uploads, built
+by the same helper, so a sheet and a sync can never put two different pictures on one map. The
 full-resolution artwork belongs in each channel's digital-delivery slot, not in its photo gallery.
+
+Note that `/assets/mind-maps/...` is never a valid image column: `netlify.toml` rewrites that whole
+path to `assets/previews/`, and anything under it without a same-named preview 404s by design.
 
 ## Preview Protection
 

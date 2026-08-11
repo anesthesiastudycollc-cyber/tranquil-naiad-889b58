@@ -1,5 +1,9 @@
 import type { Config } from "@netlify/functions";
-import { MIND_MAP_UNIT_AMOUNT, PUBLISHED_MIND_MAPS } from "../lib/mind-maps.js";
+import {
+  listingImageUrl,
+  MIND_MAP_UNIT_AMOUNT,
+  PUBLISHED_MIND_MAPS,
+} from "../lib/mind-maps.js";
 import { siteOrigin } from "../lib/stripe.js";
 
 /**
@@ -16,7 +20,13 @@ import { siteOrigin } from "../lib/stripe.js";
  * watermarked versions, at the size Etsy asks for. Do not swap them for the
  * full-resolution artwork: a marketplace listing image is public to everyone who
  * browses the category, whether or not they ever buy, so a sharp listing image
- * gives the product away. The buyer gets the full file after checkout.
+ * gives the product away. The buyer gets the full file after checkout, and the
+ * clean file belongs in each marketplace's digital-delivery slot, never in its
+ * gallery.
+ *
+ * The URL is built by `listingImageUrl()` in the mind map list rather than here,
+ * so this sheet and the photo `/api/marketplace-sync` uploads can never drift to
+ * two different pictures of the same map.
  *
  * Note what this export can and cannot do. It sets the image on listings created
  * *from* it. A listing already live on Etsy or Shopify shows a file that was
@@ -28,13 +38,6 @@ import { siteOrigin } from "../lib/stripe.js";
  * Keep the SKU column as the map id. `/api/marketplace-sync` matches a live
  * listing back to a map by SKU, and falls back to fuzzy title matching only when
  * the SKU is absent.
- * The image column points at the square listing crops this site serves from
- * `/assets/mind-maps/listing/`. Those are the right pictures for a marketplace
- * gallery, and deliberately so: they are blurred, stamped, and cropped to the
- * middle of the map at deploy time, so a shopper browsing Etsy or Shopify sees
- * the subject and the style without being shown how the whole layout is
- * arranged — which is the thing being sold. The clean full-resolution file
- * belongs in each marketplace's digital-delivery slot, never in its gallery.
  */
 export default async (req: Request) => {
   const format = new URL(req.url).searchParams.get("format") ?? "shopify";
@@ -59,16 +62,6 @@ export default async (req: Request) => {
 };
 
 const PRICE = (MIND_MAP_UNIT_AMOUNT / 100).toFixed(2);
-
-/**
- * The marketplace listing photo: a square, blurred, watermarked crop of the
- * middle of the map, written to `listing/` by `scripts/build-previews.mjs`.
- * Deliberately not the gallery preview at `/assets/mind-maps/<file>` — that one
- * is the full landscape, which shows a shopper the entire layout for free.
- */
-function listingImage(origin: string, file: string): string {
-  return `${origin}/assets/mind-maps/listing/${file}`;
-}
 
 function description(title: string): string {
   return (
@@ -121,7 +114,7 @@ function shopifyCsv(origin: string): string {
     // Digital delivery: no shipping is ever calculated for these.
     "FALSE",
     "TRUE",
-    listingImage(origin, map.file),
+    listingImageUrl(origin, map),
     "1",
     `${map.title} anesthesia mind map`,
     "FALSE",
@@ -163,7 +156,7 @@ function etsyCsv(origin: string): string {
     "I did",
     "Made to order",
     map.file,
-    listingImage(origin, map.file),
+    listingImageUrl(origin, map),
   ]);
 
   return toCsv(columns, rows);
