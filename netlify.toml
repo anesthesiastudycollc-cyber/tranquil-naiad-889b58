@@ -28,6 +28,15 @@
   status = 200
   force = true
 
+# Backwards-compatibility deep link: old /study-guides bookmarks land on the store
+# category anchor. Having this redirect avoids depending on search engines or
+# old emails that might point to /study-guides.
+[[redirects]]
+  from = "/study-guides"
+  to = "/store.html#study-guides"
+  status = 301
+  force = true
+
 # Both derivative folders only change when artwork is regenerated, and there is
 # nothing sensitive left in them, so they are safe to sit in browser caches.
 [[headers]]
