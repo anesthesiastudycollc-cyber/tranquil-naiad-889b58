@@ -105,12 +105,17 @@ No frontend framework and no bundler for the pages themselves.
   with no fonts installed would silently render a blank watermark and publish naked artwork.
   `--deploy` refuses to run unless git holds a clean copy of the artwork it is about to overwrite.
 - **The marketplace listing photo is a square crop of the middle of the map**, written to
-  `assets/mind-maps/listing/` by the same script and pointed at by the `Image Src` / `Image URL`
-  columns of `/api/mind-maps-export`. Blur hides the fine print, but a full-frame photo still gives
-  away the layout, which is the thing being sold. Blur sigma is scaled by magnification
+  `assets/mind-maps/listing/` by the same script. Blur hides the fine print, but a full-frame photo
+  still gives away the layout, which is the thing being sold. Blur sigma is scaled by magnification
   (`blurFor()`), so the crop is no more legible than the wide preview despite being enlarged. The
   gallery on `mind-maps.html` deliberately keeps the wide variant — a shopper on our own site has
   already found the product page and needs to see what shape the map is.
+- **Every marketplace image URL comes from `listingImageUrl()` in `netlify/lib/mind-maps.ts`**, and
+  resolves to `/assets/listing-images/<file>.jpg`. Both the `Image Src` / `Image URL` columns of
+  `/api/mind-maps-export` and the photo `/api/marketplace-sync` uploads call it, so a sheet and a
+  sync can never disagree about which picture a map has. Never point a marketplace column at
+  `/assets/mind-maps/...`: `netlify.toml` rewrites that path to `assets/previews/` with `force`, so
+  anything under it that has no same-named preview — the `listing/` crops included — 404s.
 - **Prices live only in `netlify/lib/catalog.ts` and `netlify/lib/mind-maps.ts`.** The browser posts
   product **ids** to `/api/checkout`; the server looks each one up and builds the Stripe line items.
   Never accept a price, name, or quantity from the client — that is the whole reason the storefront
