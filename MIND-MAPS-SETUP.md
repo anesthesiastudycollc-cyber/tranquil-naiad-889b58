@@ -232,7 +232,9 @@ checked that all the photos on your listings are maps.
 ### Or do it by hand instead
 
 You do not have to connect the accounts. The replacement files are ready and
-sized for Etsy (2000px). Each one is at:
+sized for Etsy — deliberately low resolution, so a shopper who screenshots the
+listing gets nothing worth keeping, while still clearing the size Etsy wants
+before it pushes a listing down in search. Each one is at:
 
 ```
 https://anesthesiastudyco.com/assets/listing-images/mind-map-02.jpg

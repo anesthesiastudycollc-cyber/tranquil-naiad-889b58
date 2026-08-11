@@ -29,8 +29,8 @@ No frontend framework and no bundler for the pages themselves.
 │   └── database/migrations/        # Applied automatically by Netlify at deploy
 ├── assets/
 │   ├── mind-maps/                  # Mind map artwork — SOURCE ONLY, never served
-│   ├── previews/                   # Generated 560px blurred — this site's imagery
-│   └── listing-images/             # Generated 2000px blurred — for Etsy/Shopify upload
+│   ├── previews/                   # Generated 360px blurred — this site's imagery
+│   └── listing-images/             # Generated 1000px blurred — for Etsy/Shopify upload
 ├── scripts/
 │   └── generate-previews.mjs       # Rebuilds both generated folders from the artwork
 ├── db/                             # Drizzle schema + client for the order ledger
@@ -72,8 +72,8 @@ No frontend framework and no bundler for the pages themselves.
 - **A live marketplace listing image can only be fixed through that marketplace's API.** Etsy and
   Shopify listings display a file uploaded to them at creation time and hosted by them, so changing
   the export only affects listings created *from* the export afterwards. Two things address this:
-  `assets/listing-images/` holds 2000px blurred copies at Etsy's requested size for manual
-  re-upload, and `/api/marketplace-sync` pushes them through the Etsy and Shopify APIs. Never tell
+  `assets/listing-images/` holds blurred copies sized just above Etsy's search-ranking floor for
+  manual re-upload, and `/api/marketplace-sync` pushes them through the Etsy and Shopify APIs. Never tell
   the owner that an ordinary code change has fixed a live listing — only a sync run or a manual
   re-upload does.
 - **`/api/marketplace-sync` writes to a live shop, so it is guarded three ways.** It requires

@@ -160,7 +160,7 @@ because they share one source.
 There is no live API sync on purpose. Shopify and Etsy each require their own app credentials, and
 a background job that silently rewrites live listings is a far larger commitment than a file the
 shop owner reviews before uploading. The export image column points at the blurred, watermarked
-2000px JPEGs under `/assets/listing-images/` — the same file `/api/marketplace-sync` uploads, built
+blurred JPEGs under `/assets/listing-images/` — the same file `/api/marketplace-sync` uploads, built
 by the same helper, so a sheet and a sync can never put two different pictures on one map. The
 full-resolution artwork belongs in each channel's digital-delivery slot, not in its photo gallery.
 
@@ -175,8 +175,8 @@ workspace, producing two protected variants:
 
 | Variant | Where it goes | What it is |
 | --- | --- | --- |
-| Gallery preview | `assets/mind-maps/<file>` | 900px on the long edge, blurred, tiled `ANESTHESIASTUDYCO.COM` watermark and a `PREVIEW` band |
-| Listing photo | `assets/mind-maps/listing/<file>` | Square 1200px crop of the middle of the map, blurred proportionally harder, same watermark |
+| Gallery preview | `assets/mind-maps/<file>` | 560px on the long edge, blurred, tiled `ANESTHESIASTUDYCO.COM` watermark and a `PREVIEW` band |
+| Listing photo | `assets/mind-maps/listing/<file>` | Square 800px crop of the middle of the map, blurred proportionally harder, same watermark |
 
 Because the degradation is in the pixels, it holds for a screenshot, a right-click save, a hotlink,
 and an Image CDN request at any width — none of which a CSS `filter` survives. The listing crop

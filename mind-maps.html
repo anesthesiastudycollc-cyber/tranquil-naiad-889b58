@@ -568,11 +568,14 @@
      the same place), but pointing straight at the preview keeps the sharp path out
      of the page source entirely. */
   /* Netlify Image CDN keeps previews small and fast, and serves WebP/AVIF automatically.
-     Asking it for a bigger size than this is harmless: the deployed file is already the
-     watermarked, blurred preview, so there is no sharper version behind this URL to ask for. */
+     The size asked for here matches the card and the preview file itself (360px on the
+     long edge) — asking for more would only upscale, because the deployed file is already
+     the blurred, watermarked preview and there is no sharper version behind this URL.
+     Keeping the request at card size is deliberate: whatever a visitor screenshots or
+     saves is then no bigger than what the layout needed to show them. */
   function previewSrc(file) {
     return "/.netlify/images?url=" + encodeURIComponent("/assets/previews/" + file) +
-           "&w=600&h=450&fit=cover&q=60";
+           "&w=360&h=270&fit=cover&q=45";
   }
 
   function notice(html) {

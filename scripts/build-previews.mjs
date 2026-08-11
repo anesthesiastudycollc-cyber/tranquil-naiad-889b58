@@ -39,7 +39,7 @@
  * `--force` skips both checks and is for people who are certain.
  *
  * Tuning (environment variables, all optional):
- *   PREVIEW_MAX_EDGE     longest edge of the output, in pixels   (default 900)
+ *   PREVIEW_MAX_EDGE     longest edge of the output, in pixels   (default 560)
  *   PREVIEW_BLUR_SIGMA   blur strength; higher is less legible   (default 3.4)
  *   PREVIEW_WATERMARK    the repeated diagonal text
  *   PREVIEW_BAND_TEXT    the text in the band across the middle
@@ -58,13 +58,25 @@ const DEFAULT_OUT_DIR = "preview-exports";
 /** Marketplace listing photos, kept beside the gallery previews. */
 const LISTING_SUBDIR = "listing";
 
-const MAX_EDGE = number(process.env.PREVIEW_MAX_EDGE, 900);
+/**
+ * Longest edge of a published preview, in pixels.
+ *
+ * Lowered from 900: resolution is protection too. A blurred 900px file still
+ * screenshots into something worth keeping, and every public surface displays
+ * these at card size, so the extra pixels only ever benefited whoever was
+ * saving the image rather than buying it.
+ */
+const MAX_EDGE = number(process.env.PREVIEW_MAX_EDGE, 560);
 const BLUR_SIGMA = number(process.env.PREVIEW_BLUR_SIGMA, 3.4);
 const WATERMARK = process.env.PREVIEW_WATERMARK || "ANESTHESIASTUDYCO.COM";
 const BAND_TEXT = process.env.PREVIEW_BAND_TEXT || "PREVIEW · ANESTHESIASTUDYCO.COM";
 
-/** Square side of a marketplace listing photo, in pixels. */
-const LISTING_SIZE = number(process.env.PREVIEW_LISTING_SIZE, 1200);
+/**
+ * Square side of a marketplace listing photo, in pixels. Lowered from 1200 for
+ * the same reason, and to stay in step with `scripts/generate-previews.mjs`,
+ * which writes the copies actually uploaded to Etsy and Shopify.
+ */
+const LISTING_SIZE = number(process.env.PREVIEW_LISTING_SIZE, 800);
 /**
  * How much of the map the listing photo is allowed to show, as a fraction of its
  * shorter edge. At 1 the crop is the tallest square that fits, which on a
