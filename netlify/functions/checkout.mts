@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { getProduct, safePreviewImage } from "../lib/catalog.js";
+import { getProduct, safePreviewImage, sellable, type Product } from "../lib/catalog.js";
 import { isMindMap, mindMapBundleSaving } from "../lib/mind-maps.js";
 import { getStripe, notConfiguredResponse, siteOrigin, stripeConfigured } from "../lib/stripe.js";
 
@@ -30,8 +30,15 @@ export default async (req: Request) => {
     (id): id is string => typeof id === "string",
   );
 
-  const products = ids.map(getProduct).filter((product) => product !== undefined);
-  const unknown = ids.filter((id) => !getProduct(id));
+  // A product with no price yet is a placeholder, not something to sell. The
+  // in-app blocks sit in the catalog at `unitAmount: 0` until the shop owner
+  // picks what each one costs, and Stripe would reject such a line item with an
+  // API error the customer cannot act on — so they are reported as unavailable
+  // alongside genuinely unknown ids instead.
+  const products = ids
+    .map(getProduct)
+    .filter((product): product is Product => product !== undefined && sellable(product));
+  const unknown = ids.filter((id) => !products.some((product) => product.id === id));
 
   if (products.length === 0) {
     return Response.json(
@@ -46,7 +53,9 @@ export default async (req: Request) => {
   // A cancelled checkout should land back where it started. The page is chosen
   // from a fixed set rather than taken from the request, so the body cannot
   // redirect a customer somewhere off-site.
-  const cancelPath = (body as { cancelTo?: unknown })?.cancelTo === "mind-maps" ? "/mind-maps.html" : "/store.html";
+  const cancelTo = (body as { cancelTo?: unknown })?.cancelTo;
+  const cancelPath =
+    cancelTo === "mind-maps" ? "/mind-maps.html" : cancelTo === "app" ? "/app.html" : "/store.html";
 
   // Mind maps are $2 each or any five for $9. The saving is applied as an
   // order-level discount rather than a cheaper "bundle" line item so that every

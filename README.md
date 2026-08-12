@@ -7,6 +7,7 @@ A marketing website and digital storefront for **Anesthesia Study Co. LLC**, an 
 - **index.html** — Landing page with hero, purchase buttons, app overview, marketplace links, social, about, and support sections
 - **store.html** — Digital store: pick mind maps, study guides, cram sheets and quick references, bundles, or interactive resources and pay by card
 - **mind-maps.html** — The individual mind map collection: browse previews, buy one for $2.00 or any five for $9.00, and pay by card on site
+- **app.html** — Product page for the Interactive Anesthesia Planning Workbook: what it does, the licence, and a $29.99 one-time card purchase
 - **thank-you.html** — Post-payment page that unlocks every purchased file immediately
 - **privacy.html** — Privacy policy page (required for the Apple App Store support URL)
 - **netlify/functions/** — Catalog, mind maps, channel export, checkout, order-fulfilment, and file-download endpoints
@@ -123,6 +124,40 @@ chose. `published: false` keeps a record in the catalog but off the storefront, 
 product is staged before its file exists. To add a category: append to `CATEGORIES` and use its `id`
 as the `categoryId` on products. Landing page buttons can deep-link to any category, e.g.
 `store.html#cram-sheets`; a renamed category keeps its old anchor alive through `CATEGORY_ALIASES`.
+
+### The interactive app and its in-app blocks
+
+The Interactive Anesthesia Planning Workbook is one $29.99 purchase with its own product page,
+`app.html`, which the landing page's "Get the Interactive Workbook" button opens. The page reads the
+name and price from `/api/catalog` and buys the product straight through `/api/checkout` — nothing
+about it is typed into the HTML except a fallback figure.
+
+Because the apps are self-contained HTML, their delivery records carry `openInBrowser: true`.
+`/api/download` then serves them inline, so the buyer's button opens the app instead of dropping a
+file in a Downloads folder — which on a phone is often unopenable. PDFs and ZIPs still download.
+
+Blocks that unlock inside the app are ordinary catalog products with one extra field:
+
+```ts
+{
+  id: "app-block-regional",                  // append-only; never rename an id
+  name: "Regional Anesthesia Block",
+  categoryId: "interactive-resources",
+  unlocksIn: "app-planning-workbook",        // which app it belongs to
+  published: false,                          // flip to true once priced
+  unitAmount: 0,                             // cents; 0 means "not priced yet"
+  ...
+}
+```
+
+They use the same checkout, the same Stripe entitlement check, and the same signed links as
+everything else, so there is no separate purchase path to maintain. `app.html` lists an app's blocks
+by filtering the catalog on `unlocksIn`, which means adding one is a single edit to `catalog.ts`
+with no HTML to touch; until any exist, the page shows a "pricing is being set" panel.
+
+Leave a block at `unitAmount: 0` until its price is decided. `sellable()` refuses to send anything
+under $0.50 to Stripe — the API rejects such a line item, and a customer clicking buy would get an
+unexplained "checkout failed" — so an unpriced placeholder sitting in the catalog is safe.
 
 ### Reconciling the three catalogs
 

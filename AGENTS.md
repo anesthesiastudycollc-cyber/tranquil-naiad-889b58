@@ -10,6 +10,7 @@ No frontend framework and no bundler for the pages themselves.
 ├── index.html                      # Landing page
 ├── store.html                      # Digital store (renders itself from /api/catalog)
 ├── mind-maps.html                  # Mind map collection (renders itself from /api/mind-maps)
+├── app.html                        # The interactive workbook's own product page
 ├── thank-you.html                  # Post-payment instant downloads
 ├── privacy.html                    # Privacy policy (Apple App Store support URL)
 ├── STRIPE-SETUP.md                 # Plain-language payment setup guide for the shop owner
@@ -154,7 +155,31 @@ No frontend framework and no bundler for the pages themselves.
   product **ids** to `/api/checkout`; the server looks each one up and builds the Stripe line items.
   Never accept a price, name, or quantity from the client — that is the whole reason the storefront
   fetches `/api/catalog` and the mind map page fetches `/api/mind-maps` instead of hardcoding
-  products in HTML.
+  products in HTML. This holds for *displayed* prices too: `app.html` and the landing page's app
+  section read the figure from `/api/catalog` and keep the number in the markup only as a fallback,
+  because the landing page spent an unknown stretch advertising a $19.99 workbook that checkout
+  charged $38.00 for. A price typed into HTML is a second source of truth and will drift.
+- **The interactive workbook has its own page, and the button on the landing page goes to it.**
+  `app.html` is the app's product page: it explains the app, states the copyright and licence, and
+  buys `app-planning-workbook` ($29.99) directly through `/api/checkout`. Before this the button
+  opened the Shopify shop homepage, which is a storefront, not the app — a customer who clicked it
+  had to go and find the product themselves. Anything pointing at "the app" links to `app.html`, not
+  to a marketplace and not to `store.html#interactive-resources`.
+- **In-app blocks are ordinary catalog products carrying `unlocksIn: "app-planning-workbook"`.**
+  They go through the same checkout, entitlement check, and signed link as everything else, so there
+  is nothing bespoke to maintain; `app.html` lists an app's blocks by filtering `/api/catalog` on
+  that field, which means adding a block is one catalog edit and no HTML. A block whose price has
+  not been decided stays `published: false` with `unitAmount: 0`, and `sellable()` in `catalog.ts`
+  is what stops such a record from reaching Stripe — a sub-$0.50 line item is rejected by the API,
+  so without the guard a customer clicking buy on an unpriced block would get "checkout failed"
+  with nothing to act on. With no blocks defined, `app.html` renders an honest "pricing is being
+  set" panel rather than an empty grid.
+- **`openInBrowser` on a file delivery serves it inline instead of as a download.** The interactive
+  apps are self-contained HTML, and one that lands in a Downloads folder is a worse product than one
+  that opens when the buyer taps the button — on a phone it is frequently one that cannot be opened
+  at all. `/api/download` reads the flag, `/api/order` passes it to `thank-you.html` as `opens` so
+  the button says "Open" rather than "Download", and everything else still downloads as a file. Only
+  ever set it on first-party files this repo publishes: inline HTML runs on our own origin.
 - **Mind maps are catalog products that skip the catalog listing.** `mind-maps.ts` products resolve
   through `getProduct()` so checkout, fulfilment, and download treat them normally, but they are
   excluded from `publicCatalog()` — 89 two-dollar items would bury the study guides on `store.html`.
