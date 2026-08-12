@@ -66,6 +66,32 @@ function marketplaceCheck(): Check {
   };
 }
 
+/**
+ * What a Stripe secret key looks like, so the page can say which of the several
+ * "Stripe rejected the key" causes actually applies.
+ *
+ * Asking Stripe is the real test, but a rejection on its own leaves the owner
+ * guessing between a typo, a rolled key, and having pasted the wrong value
+ * entirely — and the wrong value is by far the most common. That is decidable
+ * here without a network call, so it is checked first and named precisely.
+ */
+const STRIPE_SECRET_KEY_PATTERN = /^(sk|rk)_(test|live)_[A-Za-z0-9]+$/;
+const STRIPE_SECRET_KEY_MIN_LENGTH = 40;
+
+/**
+ * The part of a value before its first underscore, for telling the owner which
+ * kind of value they pasted.
+ *
+ * Only ever called for a value that has already failed
+ * `STRIPE_SECRET_KEY_PATTERN`, so it cannot echo a working credential, and it is
+ * capped regardless — the goal is to say "this is a pk_/price_/product id", not
+ * to reproduce what was saved.
+ */
+function valueKind(value: string): string {
+  const prefix = value.split("_")[0] ?? "";
+  return prefix.length > 0 && prefix.length <= 6 ? `"${prefix}_…"` : "something else";
+}
+
 async function stripeKeyCheck(): Promise<Check> {
   if (!stripeConfigured()) {
     return {
@@ -78,8 +104,39 @@ async function stripeKeyCheck(): Promise<Check> {
     };
   }
 
+  const raw = Netlify.env.get("STRIPE_SECRET_KEY") ?? "";
+  const key = raw.trim();
+
+  // A value that is not shaped like a Stripe secret key can be diagnosed exactly,
+  // and no amount of re-copying the wrong field will fix it.
+  if (!STRIPE_SECRET_KEY_PATTERN.test(key) || key.length < STRIPE_SECRET_KEY_MIN_LENGTH) {
+    return {
+      level: "bad",
+      title: "The value saved as STRIPE_SECRET_KEY is not a Stripe secret key",
+      detail:
+        `It starts with ${valueKind(key)} and is ${key.length} characters long. A Stripe secret key ` +
+        "starts with sk_test_ or sk_live_ and is far longer — around a hundred characters. This is " +
+        "why every card payment is failing: customers reach the store, press buy, and are told to " +
+        "try again. Go to Stripe → Developers → API keys and copy the Secret key (press Reveal " +
+        "first — the Publishable key beginning pk_ is the other one on that screen and will not " +
+        "work). Paste it into Netlify under Site configuration → Environment variables as " +
+        "STRIPE_SECRET_KEY, redeploy, and reload this page.",
+    };
+  }
+
+  if (raw !== key) {
+    return {
+      level: "bad",
+      title: "STRIPE_SECRET_KEY has a stray space in it",
+      detail:
+        "The key itself looks right, but the saved value has a space or line break at the start or " +
+        "end, which Stripe counts as part of the key and rejects. Re-paste it in Netlify without " +
+        "the extra whitespace and redeploy.",
+    };
+  }
+
   // The key prefix is not a secret — it only says which Stripe mode is in use.
-  const live = (Netlify.env.get("STRIPE_SECRET_KEY") ?? "").startsWith("sk_live_");
+  const live = key.startsWith("sk_live_");
   const mode = live ? "live" : "test";
   const stripe = getStripe();
 
@@ -90,10 +147,10 @@ async function stripeKeyCheck(): Promise<Check> {
       level: "bad",
       title: "Stripe rejected the key",
       detail:
-        "STRIPE_SECRET_KEY is set, but Stripe would not accept it. It is usually a key that was " +
-        "copied incompletely, a key that has been rolled in the Stripe dashboard, or a stray space " +
-        "at the start or end of the value. Copy the Secret key again from Stripe → Developers → " +
-        "API keys, paste it fresh, and redeploy.",
+        "STRIPE_SECRET_KEY is shaped like a real key, but Stripe would not accept it. That normally " +
+        "means it was copied incompletely, or it has been rolled or deleted in the Stripe dashboard " +
+        "since it was saved here. Copy the Secret key again from Stripe → Developers → API keys, " +
+        "paste it fresh, and redeploy.",
     };
   }
 
