@@ -1,5 +1,5 @@
 import type { Config } from "@netlify/functions";
-import { getProduct } from "../lib/catalog.js";
+import { getProduct, safePreviewImage } from "../lib/catalog.js";
 import { isMindMap, mindMapBundleSaving } from "../lib/mind-maps.js";
 import { getStripe, notConfiguredResponse, siteOrigin, stripeConfigured } from "../lib/stripe.js";
 
@@ -81,7 +81,11 @@ export default async (req: Request) => {
             // Stripe fetches this and renders it on the hosted checkout page, so
             // it is always the blurred, watermarked preview — the checkout page
             // is seen before payment, and previously showed no image at all.
-            ...(product.previewImage ? { images: [`${origin}${product.previewImage}`] } : {}),
+            // `safePreviewImage` is what makes "always" true: it drops any path
+            // outside assets/previews/ rather than handing Stripe the artwork.
+            ...(safePreviewImage(product)
+              ? { images: [`${origin}${safePreviewImage(product)}`] }
+              : {}),
             // Read back during fulfilment to map a paid line item to a catalog entry.
             metadata: { product_id: product.id },
           },

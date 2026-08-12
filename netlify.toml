@@ -1,9 +1,16 @@
 [build]
   publish = "."
-  # Replaces the mind map artwork with blurred, watermarked previews before the
-  # site is deployed. The originals stay untouched in git; only the protected
-  # versions are ever published. See scripts/build-previews.mjs.
-  command = "npm run previews:deploy"
+  # Two steps, in this order.
+  #
+  # `links:check` fails the build if a page links to a section or a file that is
+  # not there. It exists because the landing page once shipped with its "Browse
+  # Mind Maps" and Amazon buttons pointing at sections an edit had deleted: the
+  # HTML was still valid, the deploy was still green, and the buttons did nothing.
+  #
+  # `previews:deploy` then replaces the mind map artwork with blurred, watermarked
+  # previews before the site is deployed. The originals stay untouched in git;
+  # only the protected versions are ever published. See scripts/build-previews.mjs.
+  command = "npm run links:check && npm run previews:deploy"
 
 [functions]
   directory = "netlify/functions"

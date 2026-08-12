@@ -9,3 +9,6 @@ preview-exports/
 # Generated at deploy time by scripts/build-previews.mjs. If a local --force run
 # leaves it behind, an untracked directory here would trip the git safety check.
 assets/mind-maps/listing/
+# The files buyers pay for, staged for scripts/upload-downloads.mjs. They belong
+# in the digital-products blob store, not in a repository.
+product-files/

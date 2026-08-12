@@ -31,15 +31,17 @@ No frontend framework and no bundler for the pages themselves.
 │   ├── mind-maps/                  # Mind map artwork — SOURCE ONLY, never served
 │   ├── previews/                   # Generated 560px blurred — this site's imagery
 │   └── listing-images/             # Generated 2000px blurred — for Etsy/Shopify upload
-├── scripts/
-│   └── generate-previews.mjs       # Rebuilds both generated folders from the artwork
+├── product-files/                  # Git-ignored staging for the files buyers pay for
 ├── db/                             # Drizzle schema + client for the order ledger
 ├── scripts/
 │   ├── build-previews.mjs          # Burns blur + watermark into previews at deploy time
+│   ├── generate-previews.mjs       # Rebuilds both generated asset folders from the artwork
+│   ├── check-links.mjs             # Build gate: no page may link at a missing id or file
+│   ├── upload-downloads.mjs        # Stocks the digital-products blob store from disk
 │   ├── reconcile-catalog.mjs       # Read-only website ↔ Stripe ↔ Etsy master table
+│   ├── backfill-stripe-metadata.mjs # One-off: writes internal ids onto Stripe products
 │   ├── ts-js-resolve.mjs           # Lets plain node scripts import the .ts libs
 │   └── font5x7.mjs                 # Bitmap font the watermark is drawn from
-├── assets/mind-maps/               # SOURCE artwork — never published as-is
 ├── netlify.toml
 ├── README.md
 └── AGENTS.md
@@ -119,6 +121,35 @@ No frontend framework and no bundler for the pages themselves.
   sync can never disagree about which picture a map has. Never point a marketplace column at
   `/assets/mind-maps/...`: `netlify.toml` rewrites that path to `assets/previews/` with `force`, so
   anything under it that has no same-named preview — the `listing/` crops included — 404s.
+- **A product picture may only ever come from `/assets/previews/`, and that is enforced on the
+  server.** `safePreviewImage()` in `catalog.ts` returns a product's image only when it starts with
+  that prefix, and both `publicCatalog()` and the Stripe line item in `checkout.mts` go through it.
+  A record that points anywhere else renders a lettered tile rather than a picture. The check is
+  duplicated in `store.html` (`previewSrc()`) because the browser is where the leak would be
+  visible, but the server one is the one that matters: without it, a single edit to a `previewImage`
+  field could put sharp artwork on the storefront *and* on Stripe's hosted checkout page, which is a
+  surface this repo does not control and cannot retroactively fix. Products with no artwork keep no
+  `previewImage` at all — an initial tile is the honest rendering, and inventing a picture for them
+  would be worse than showing none.
+- **`npm run links:check` runs before anything else in the build, and a failure blocks the deploy.**
+  It exists because the landing page shipped with "Browse Mind Maps" and the Amazon strip pointing
+  at `#mindmaps` and `#books` after an edit deleted those sections along with two thirds of the
+  file, leaving it ending on `<!-- rest of file unchanged -->`. The HTML stayed valid, the deploy
+  stayed green, and the buttons did nothing. `scripts/check-links.mjs` checks the three things that
+  would have caught it: same-page anchors resolve to a real id, local `href`/`src` targets exist on
+  disk, and no page ends early or contains a truncation marker. Cross-page hashes are deliberately
+  only checked as far as the file — `store.html#study-guides` has no id on disk because the sections
+  are built from `/api/catalog` after load. For the same reason `mind-maps.html` resolves its own
+  `#map-05` deep links in JavaScript after `render()`; the browser cannot, since the grid does not
+  exist when the fragment is applied.
+- **`scripts/upload-downloads.mjs` must never run on a build machine, and refuses to.** It stocks
+  the `digital-products` store, sourcing the mind maps from `assets/mind-maps/<blobKey>` and
+  everything else from git-ignored `product-files/<blobKey>`. But `build-previews.mjs --deploy`
+  overwrites that artwork folder in place with watermarked previews, so an upload from inside a
+  build would store the preview as the file buyers pay for — the download would silently become the
+  thing the watermark exists to prevent. It therefore stops when `NETLIFY=true` or when
+  `git status --porcelain -- assets/mind-maps` is dirty, and it is a dry run unless `--confirm` is
+  passed, because what it writes is live for real customers with no review step in between.
 - **Prices live only in `netlify/lib/catalog.ts` and `netlify/lib/mind-maps.ts`.** The browser posts
   product **ids** to `/api/checkout`; the server looks each one up and builds the Stripe line items.
   Never accept a price, name, or quantity from the client — that is the whole reason the storefront

@@ -225,6 +225,13 @@
       box-shadow: 0 0 0 1px rgba(255,216,77,0.45);
     }
 
+    /* The card a #map-xx link arrived at, so the shopper can see which one of
+       89 the landing page sent them to. */
+    .map.targeted {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px rgba(0,194,255,0.55);
+    }
+
     .thumb {
       position: relative;
       display: block;
@@ -797,10 +804,31 @@
       }
 
       render();
+      focusRequestedMap();
     })
     .catch(function (error) {
       notice(etsyFallback(error.message));
     });
+
+  /**
+   * Scrolls to the map named in the address bar, e.g. mind-maps.html#map-05.
+   *
+   * The landing page's featured cards link straight to a map here rather than
+   * out to a marketplace, so the shopper arrives at the card that made them
+   * click and can buy it with the site's own Stripe checkout. It runs after
+   * render() because the grid does not exist in the HTML — the browser cannot
+   * resolve the fragment itself, so nothing happens without this.
+   */
+  function focusRequestedMap() {
+    var id = window.location.hash.replace("#", "");
+    if (!id) return;
+
+    var card = document.querySelector('.map[data-id="' + id.replace(/["\\]/g, "") + '"]');
+    if (!card) return;
+
+    card.classList.add("targeted");
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 </script>
 
 </body>
