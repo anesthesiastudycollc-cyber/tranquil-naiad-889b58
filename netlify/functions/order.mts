@@ -62,6 +62,11 @@ export default async (req: Request) => {
       format: product.format,
       categoryId: product.categoryId,
       unitAmount: product.unitAmount,
+      // Whether the confirmation page should offer to open this item or to save
+      // it. The interactive apps open; every file product downloads. Sent from
+      // here rather than guessed from the format string, so one field in the
+      // catalog decides it for the button, the header, and the wording alike.
+      opens: product.delivery.kind === "file" && product.delivery.openInBrowser === true,
       downloadUrl:
         product.delivery.kind === "link"
           ? product.delivery.url

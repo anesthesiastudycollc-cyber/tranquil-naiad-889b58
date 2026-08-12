@@ -202,23 +202,30 @@
     }
 
     var items = order.items || [];
+    var opensCount = items.filter(function (item) { return item.opens; }).length;
 
     var list = items
       .map(function (item) {
+        // An interactive app opens in a new tab; a PDF or ZIP saves to disk. The
+        // catalog decides which, so the button never promises the wrong thing.
+        var openInTab = Boolean(item.opens);
         return (
           "<li><div>" +
             '<p class="item-name">' + escapeHtml(item.name) + "</p>" +
             '<p class="item-format">' + escapeHtml(item.format) + "</p>" +
           "</div>" +
-          '<a class="btn primary" href="' + escapeHtml(item.downloadUrl) + '">Download</a></li>'
+          '<a class="btn primary" href="' + escapeHtml(item.downloadUrl) + '"' +
+            (openInTab ? ' target="_blank" rel="noopener"' : "") + ">" +
+            (openInTab ? "Open" : "Download") +
+          "</a></li>"
         );
       })
       .join("");
 
     panel.innerHTML =
-      "<h1>Payment complete — your files are ready</h1>" +
+      "<h1>Payment complete — your " + (opensCount === items.length && items.length > 0 ? "purchase is" : "files are") + " ready</h1>" +
       "<p>" +
-        (items.length === 1 ? "Your download is" : "All " + items.length + " downloads are") +
+        (items.length === 1 ? "It is" : "All " + items.length + " items are") +
         " available right now. " +
         "Bookmark this page: the links keep working for 30 days." +
       "</p>" +
@@ -227,7 +234,7 @@
         (order.email ? "<span>Receipt sent to <strong>" + escapeHtml(order.email) + "</strong></span>" : "") +
         "<span>Total paid <strong>" + money.format((order.amountTotal || 0) / 100) + "</strong></span>" +
       "</div>" +
-      '<p class="hint">Trouble downloading? Email ' +
+      '<p class="hint">Trouble opening or downloading? Email ' +
         '<a class="plain" href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a> ' +
         "and we will send your files directly.</p>";
   }

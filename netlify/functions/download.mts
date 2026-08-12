@@ -65,10 +65,22 @@ export default async (req: Request) => {
     );
   }
 
+  // The interactive apps are marked `openInBrowser`, so they render here instead
+  // of being saved to disk: an app that arrives as a file in a Downloads folder
+  // is a worse product than one that opens when the buyer taps the button, and
+  // on a phone it is frequently one that cannot be opened at all. Everything
+  // else — the PDFs, the ZIPs, the artwork — still downloads as a file.
+  //
+  // Only first-party files this repo publishes ever carry that flag. Serving
+  // HTML inline runs it on our own origin, so `nosniff` is set here and nothing
+  // a customer supplies is ever streamed through this endpoint.
+  const inline = product.delivery.openInBrowser === true;
+
   return new Response(file, {
     headers: {
       "Content-Type": product.delivery.contentType,
-      "Content-Disposition": `attachment; filename="${product.delivery.filename}"`,
+      "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${product.delivery.filename}"`,
+      "X-Content-Type-Options": "nosniff",
       "Cache-Control": "private, no-store",
     },
   });

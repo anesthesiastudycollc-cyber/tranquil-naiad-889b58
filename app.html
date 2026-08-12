@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Anesthesia Planning Workbook — Anesthesia Study Co. LLC</title>
+<meta name="description" content="The Interactive Anesthesia Planning Workbook: a guided, tappable case-planning app for preop, induction, maintenance, emergence, and crisis planning. One-time purchase, instant access, no subscription.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Same tokens as the landing page: this is the app's own product page and a
+     buyer arrives here straight from the "Get the Interactive Workbook" button,
+     so the two surfaces have to feel like one site. Declared per page rather
+     than shared, which is the convention every page in this repo follows. */
+  :root{
+    --navy:#0c1240;
+    --navy-2:#141c5e;
+    --navy-3:#1d2578;
+    --ink:#1b2140;
+    --cream:#faf7f2;
+    --cream-2:#f1eef9;
+    --paper:#fffefb;
+    --gold:#f2a93b;
+    --gold-light:#ffce7a;
+    --gold-dark:#c9821e;
+    --blue:#2f6fed;
+    --blue-light:#7db0ff;
+    --purple:#6c4cd8;
+    --purple-light:#a98cf2;
+    --sage:#7c9885;
+    --line:#e3ddf2;
+    --muted:#5c6577;
+    --shadow: 0 20px 50px -20px rgba(20,20,70,0.35);
+    --radius: 14px;
+    --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background:var(--cream);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%;display:block;}
+  a{color:inherit;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+  h1,h2,h3,h4{font-family:var(--serif);margin:0 0 .5em;font-weight:700;letter-spacing:.2px;}
+  p{margin:0 0 1em;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--sans);font-size:12.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+    color:var(--gold-dark);
+  }
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--gold-dark);display:inline-block;}
+  section{padding:96px 0;}
+  .section-head{max-width:680px;margin:0 auto 56px;text-align:center;}
+  .section-head h2{font-size:clamp(28px,4vw,42px);margin-top:12px;color:var(--navy);}
+  .section-head p{color:var(--muted);font-size:17px;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    padding:15px 28px;border-radius:999px;font-weight:600;font-size:15px;
+    text-decoration:none;cursor:pointer;border:1px solid transparent;
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+    white-space:nowrap;
+    font-family:var(--sans);
+  }
+  .btn-gold{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 12px 26px -10px rgba(94,84,224,.6);}
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 16px 32px -10px rgba(94,84,224,.75);}
+  .btn-gold:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none;}
+  .btn-outline-dark{background:transparent;color:var(--navy);border-color:var(--navy);}
+  .btn-outline-dark:hover{background:var(--navy);color:var(--cream);transform:translateY(-2px);}
+  .btn-small{padding:10px 20px;font-size:13.5px;}
+  .btn-block{width:100%;}
+
+  /* Header */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    background:rgba(11,21,38,.88);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(94,84,224,.18);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:1180px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--cream);}
+  .brand-text{line-height:1.15;}
+  .brand-text strong{display:block;font-family:var(--serif);font-size:17px;letter-spacing:.3px;}
+  .brand-text span{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);}
+  nav.links{display:flex;align-items:center;gap:30px;}
+  nav.links a{
+    color:rgba(250,246,238,.85);text-decoration:none;font-size:14.5px;font-weight:500;
+    position:relative;padding:4px 0;
+  }
+  nav.links a::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--blue-light);transition:width .2s ease;}
+  nav.links a:hover{color:var(--cream);}
+  nav.links a:hover::after{width:100%;}
+  nav.links a.current{color:var(--gold-light);}
+  nav.links a.current::after{width:100%;background:var(--gold-light);}
+  .nav-actions{display:flex;align-items:center;gap:14px;}
+  .menu-toggle{
+    display:none;background:none;border:1px solid rgba(250,246,238,.35);border-radius:8px;
+    width:42px;height:42px;cursor:pointer;color:var(--cream);
+    align-items:center;justify-content:center;
+  }
+  .menu-toggle span{display:block;width:18px;height:2px;background:var(--cream);position:relative;}
+  .menu-toggle span::before,.menu-toggle span::after{content:"";position:absolute;left:0;width:18px;height:2px;background:var(--cream);}
+  .menu-toggle span::before{top:-6px;}
+  .menu-toggle span::after{top:6px;}
+
+  @media (max-width:920px){
+    nav.links{
+      position:fixed;top:73px;left:0;right:0;bottom:0;
+      background:var(--navy);flex-direction:column;align-items:flex-start;
+      padding:32px 24px;gap:4px;
+      transform:translateX(-100%);transition:transform .3s ease;
+      overflow-y:auto;
+    }
+    nav.links.open{transform:translateX(0);}
+    nav.links a{width:100%;padding:14px 0;border-bottom:1px solid rgba(94,84,224,.15);font-size:16px;}
+    .menu-toggle{display:flex;}
+    .btn-small-desktop{display:none;}
+  }
+
+  /* Hero: the app on the left, the purchase decision on the right. Deliberately
+     asymmetric — the buy panel is the narrower column and stays in view. */
+  .hero{
+    background:linear-gradient(150deg,var(--navy) 0%, var(--navy-2) 45%, #241a5e 100%);
+    color:var(--cream);padding:150px 0 96px;position:relative;overflow:hidden;
+  }
+  .hero::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(620px 340px at 12% 8%, rgba(94,84,224,.32), transparent 62%),
+               radial-gradient(420px 280px at 88% 92%, rgba(242,169,59,.14), transparent 65%);
+  }
+  .hero .wrap{position:relative;z-index:1;}
+  .hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:56px;align-items:center;}
+  .hero h1{font-size:clamp(32px,4.6vw,50px);color:#fff;margin-top:14px;line-height:1.15;}
+  .hero .lede{color:rgba(250,246,238,.82);font-size:17.5px;max-width:33em;}
+  .hero-tags{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 0;padding:0;list-style:none;}
+  .hero-tags li{
+    font-size:12.5px;font-weight:600;letter-spacing:.4px;
+    border:1px solid rgba(250,246,238,.28);border-radius:999px;padding:7px 15px;
+    color:rgba(250,246,238,.9);
+  }
+
+  /* Buy panel */
+  .buy{
+    background:var(--paper);color:var(--ink);border-radius:20px;padding:34px;
+    box-shadow:0 30px 70px -25px rgba(0,0,0,.6);border:1px solid rgba(227,221,242,.6);
+  }
+  .buy .price-row{display:flex;align-items:baseline;gap:12px;margin-bottom:6px;}
+  .buy .amt{font-family:var(--serif);font-size:46px;font-weight:700;color:var(--navy);line-height:1;}
+  .buy .once{font-size:13.5px;color:var(--muted);font-weight:600;letter-spacing:.4px;text-transform:uppercase;}
+  .buy .amt.loading{
+    color:transparent;background:linear-gradient(90deg,var(--cream-2),#e7e2f6,var(--cream-2));
+    background-size:200% 100%;border-radius:8px;min-width:132px;
+    animation:shimmer 1.2s linear infinite;
+  }
+  @keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+  @media (prefers-reduced-motion:reduce){
+    .buy .amt.loading{animation:none;}
+    .btn{transition:none;}
+  }
+  .buy .sub{font-size:14px;color:var(--muted);margin-bottom:22px;}
+  .buy ul{list-style:none;padding:0;margin:0 0 24px;}
+  .buy li{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;margin-bottom:11px;}
+  .buy li .chk{
+    width:20px;height:20px;border-radius:50%;background:var(--sage);color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:3px;
+  }
+  .buy .assurance{font-size:12.5px;color:var(--muted);text-align:center;margin:14px 0 0;}
+  .buy-msg{
+    display:none;margin:0 0 18px;padding:13px 16px;border-radius:12px;font-size:14px;
+    border:1px solid transparent;
+  }
+  .buy-msg.show{display:block;}
+  .buy-msg.warn{background:#fff6e6;border-color:#f0d9a8;color:#6b4a08;}
+  .buy-msg.error{background:#fdecec;border-color:#f2c2c2;color:#7a1f1f;}
+  .buy-msg a{color:inherit;font-weight:600;}
+
+  /* App mock — a fuller version of the one on the landing page */
+  .mock-shell{
+    background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+    border:1px solid rgba(250,246,238,.16);
+    border-radius:22px;padding:20px;
+  }
+  .app-mock{
+    background:var(--cream);border-radius:14px;padding:22px;color:var(--ink);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
+  }
+  .app-mock .mock-head{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+  .app-mock .dot{width:9px;height:9px;border-radius:50%;background:var(--line);}
+  .app-mock .mock-title{font-family:var(--serif);font-weight:700;font-size:15px;color:var(--navy);margin-bottom:14px;}
+  .app-mock .mock-row{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:var(--cream-2);
+    margin-bottom:8px;font-size:13px;font-weight:600;color:var(--navy);
+  }
+  .app-mock .mock-row .chk{width:16px;height:16px;border-radius:50%;background:var(--sage);flex-shrink:0;}
+  .app-mock .mock-row.locked{background:#efeaf9;color:var(--muted);}
+  .app-mock .mock-row.locked .chk{background:var(--line);}
+  .app-mock .mock-note{font-size:11.5px;color:var(--muted);margin:12px 0 0;letter-spacing:.2px;}
+
+  /* Phases: a vertical run rather than three equal cards */
+  .phases{display:grid;gap:0;max-width:860px;margin:0 auto;}
+  .phase{
+    display:grid;grid-template-columns:72px 1fr;gap:24px;align-items:start;
+    padding:26px 0;border-bottom:1px solid var(--line);
+  }
+  .phase:last-child{border-bottom:none;}
+  .phase .num{
+    font-family:var(--serif);font-size:34px;font-weight:700;color:var(--purple-light);
+    line-height:1;padding-top:4px;
+  }
+  .phase h3{font-size:20px;color:var(--navy);margin-bottom:6px;}
+  .phase p{color:var(--muted);font-size:15.5px;margin:0;}
+
+  /* Blocks */
+  .blocks{background:var(--cream-2);}
+  .block-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;}
+  .block-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:24px;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .block-card h3{font-size:17.5px;color:var(--navy);margin:0;}
+  .block-card p{font-size:14px;color:var(--muted);margin:0;}
+  .block-card .block-price{margin-top:auto;padding-top:14px;font-weight:700;color:var(--navy);font-size:17px;}
+  .block-empty{
+    background:var(--paper);border:1px dashed #c9c0e6;border-radius:16px;
+    padding:34px;text-align:center;max-width:720px;margin:0 auto;
+  }
+  .block-empty h3{color:var(--navy);font-size:21px;}
+  .block-empty p{color:var(--muted);margin-bottom:0;}
+
+  /* Licence */
+  .licence{
+    background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:40px;
+    max-width:860px;margin:0 auto;box-shadow:var(--shadow);
+  }
+  .licence h2{font-size:26px;color:var(--navy);}
+  .licence dl{margin:0;display:grid;grid-template-columns:180px 1fr;gap:14px 28px;font-size:15px;}
+  .licence dt{font-weight:700;color:var(--navy);}
+  .licence dd{margin:0;color:var(--muted);}
+  @media (max-width:640px){.licence dl{grid-template-columns:1fr;gap:4px 0;}.licence dd{margin-bottom:14px;}}
+
+  .disclaimer{
+    max-width:860px;margin:34px auto 0;text-align:center;font-size:13px;color:var(--muted);
+  }
+
+  footer{background:var(--navy);color:rgba(250,246,238,.75);padding:70px 0 26px;}
+  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:44px;border-bottom:1px solid rgba(94,84,224,.18);}
+  .foot-brand .brand-text strong{color:#fff;}
+  .foot-brand p{font-size:13.5px;color:rgba(250,246,238,.55);margin-top:14px;max-width:280px;}
+  footer h4{font-family:var(--sans);font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-light);margin-bottom:16px;}
+  footer ul{list-style:none;padding:0;margin:0;}
+  footer li{margin-bottom:11px;}
+  footer a{color:rgba(250,246,238,.75);text-decoration:none;font-size:14.5px;}
+  footer a:hover{color:var(--gold-light);}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:26px;font-size:12.5px;color:rgba(250,246,238,.45);}
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:560px){.foot-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body id="top">
+
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="nav">
+    <a href="index.html" class="brand">
+      <span class="brand-text"><strong>Anesthesia Study Co.</strong><span>Educational Anesthesia Tools</span></span>
+    </a>
+    <nav class="links" id="navLinks">
+      <a href="store.html">Store</a>
+      <a href="mind-maps.html">Mind Maps</a>
+      <a href="app.html" class="current">The App</a>
+      <a href="index.html#bundle">Bundle</a>
+      <a href="index.html#books">Books</a>
+      <a href="index.html#faq">FAQ</a>
+      <a href="index.html#support">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="store.html" class="btn btn-gold btn-small btn-small-desktop">Shop Now</a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO / BUY ============ -->
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">Interactive App</span>
+        <h1>The Interactive Anesthesia Planning Workbook</h1>
+        <p class="lede">
+          A guided, tappable workbook for structured case planning — preop review through crisis
+          response — built for anesthesia learners working through simulations and clinical days.
+          It opens in any browser, keeps your entries between sessions, and needs no install.
+        </p>
+        <ul class="hero-tags">
+          <li>Opens in your browser</li>
+          <li>Works offline</li>
+          <li>No account, no subscription</li>
+          <li>Yours to keep</li>
+        </ul>
+
+        <div class="mock-shell" style="margin-top:38px;max-width:460px;">
+          <div class="app-mock">
+            <div class="mock-head"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            <div class="mock-title">Case Planning Workbook</div>
+            <div class="mock-row"><span class="chk"></span> Preop review &amp; risk factors</div>
+            <div class="mock-row"><span class="chk"></span> Induction agent decision tree</div>
+            <div class="mock-row"><span class="chk"></span> Maintenance &amp; emergence checklist</div>
+            <div class="mock-row"><span class="chk"></span> Crisis response simulation</div>
+            <div class="mock-row locked"><span class="chk"></span> Additional blocks — open inside the app</div>
+            <p class="mock-note">Illustration of the workbook layout.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="buy" id="buy">
+        <div class="price-row">
+          <span class="amt loading" id="price" data-fallback="$29.99">$29.99</span>
+          <span class="once">One-time</span>
+        </div>
+        <p class="sub" id="priceSub">One purchase. No subscription, no renewal, no per-device fee.</p>
+
+        <div class="buy-msg" id="buyMsg" role="status"></div>
+
+        <ul>
+          <li><span class="chk">✓</span> Instant access the moment payment clears</li>
+          <li><span class="chk">✓</span> Opens straight in your browser — phone, tablet, or laptop</li>
+          <li><span class="chk">✓</span> Your entries save locally between sessions</li>
+          <li><span class="chk">✓</span> Further blocks open inside the app</li>
+        </ul>
+
+        <button class="btn btn-gold btn-block" id="buyBtn">Buy the App</button>
+        <p class="assurance">Secure card checkout by Stripe · We never see your card details</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ WHAT IS INSIDE ============ -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">What You Work Through</span>
+      <h2>A case, from the pre-op page to the debrief</h2>
+      <p>The workbook follows the shape of a real anesthetic, prompting for the decisions at the point they are actually made.</p>
+    </div>
+    <div class="phases">
+      <div class="phase">
+        <div class="num">01</div>
+        <div>
+          <h3>Preoperative review</h3>
+          <p>Comorbidities, airway assessment, medications held and continued, fasting status, and the risk factors that change the plan — captured before anything else is decided.</p>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">02</div>
+        <div>
+          <h3>Induction</h3>
+          <p>An agent decision tree that asks what the patient in front of you can tolerate, with dosing prompts and the reasoning written next to the choice rather than after it.</p>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">03</div>
+        <div>
+          <h3>Maintenance</h3>
+          <p>Depth, ventilation, fluids, and hemodynamic targets tracked as a checklist you can work down mid-case, with space for what you would change and why.</p>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">04</div>
+        <div>
+          <h3>Emergence</h3>
+          <p>Reversal, extubation criteria, and the handover summary — the part of a plan most often left until it is already happening.</p>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">05</div>
+        <div>
+          <h3>Crisis response</h3>
+          <p>Structured walk-throughs for the events worth rehearsing before you meet them, so the sequence is familiar rather than improvised.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ IN-APP BLOCKS ============ -->
+<section class="blocks" id="blocks">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Inside the App</span>
+      <h2>Blocks that open once you own it</h2>
+      <p>The workbook is a single purchase. Additional blocks unlock inside it, each one bought separately — you are never asked to re-buy what you already have.</p>
+    </div>
+    <div id="blockList">
+      <div class="block-empty">
+        <h3>Pricing is being set</h3>
+        <p>The additional blocks are being priced now and are not on sale yet. Buying the workbook today gets you the full planning app; blocks appear here and inside the app as each one is released.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LICENCE ============ -->
+<section>
+  <div class="wrap">
+    <div class="licence">
+      <span class="eyebrow">Copyright &amp; Licence</span>
+      <h2>What you are buying</h2>
+      <dl>
+        <dt>Copyright</dt>
+        <dd>© <span class="year"></span> Anesthesia Study Co. LLC. All rights reserved. The workbook, its prompts, and its content are the property of Anesthesia Study Co. LLC.</dd>
+
+        <dt>Your licence</dt>
+        <dd>A personal, non-transferable licence to use the app for your own study and clinical preparation, for as long as you like.</dd>
+
+        <dt>Not permitted</dt>
+        <dd>Reselling, redistributing, sharing the file, or republishing any part of it — including to a class, cohort, or study group. Ask us about institutional licensing instead.</dd>
+
+        <dt>Refunds</dt>
+        <dd>Digital goods unlock immediately, so purchases are final. If the app does not open for you, email us and we will fix it or refund you.</dd>
+      </dl>
+      <p style="margin:26px 0 0;font-size:14px;">
+        Questions about licensing for a program or department?
+        <a href="mailto:admin@anesthesiastudyco.com" style="color:var(--blue);font-weight:600;">admin@anesthesiastudyco.com</a>
+      </p>
+    </div>
+    <p class="disclaimer">
+      For educational purposes only. Not medical advice, and not a substitute for institutional
+      protocols or clinical judgment.
+    </p>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="index.html" class="brand">
+          <span class="brand-text"><strong>Anesthesia Study Co.</strong><span>Educational Anesthesia Tools</span></span>
+        </a>
+        <p>Visual, high-yield anesthesia study tools — mind maps, cram sheets, study guides, and an interactive planning workbook. Educational purposes only; not medical advice.</p>
+      </div>
+      <div>
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="store.html">Digital Store</a></li>
+          <li><a href="mind-maps.html">All 89 Mind Maps</a></li>
+          <li><a href="app.html">Interactive App</a></li>
+          <li><a href="index.html#bundle">Bundle</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <ul>
+          <li><a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="index.html#faq">Refund &amp; Delivery Info</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span class="year"></span> Anesthesia Study Co. LLC. All rights reserved.</span>
+      <span>Educational purposes only. Not medical advice.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // The one product this page sells. Everything else about it — name, price,
+  // whether it is on sale — is read from /api/catalog, because the catalog is
+  // the only place a price is allowed to live. A number typed into this file
+  // would be a second source of truth and would eventually disagree with what
+  // Stripe charges, which is exactly how this page came to advertise $19.99 for
+  // a $38.00 product.
+  var APP_ID = "app-planning-workbook";
+
+  var priceEl = document.getElementById("price");
+  var priceSub = document.getElementById("priceSub");
+  var buyBtn = document.getElementById("buyBtn");
+  var msgEl = document.getElementById("buyMsg");
+  var blockList = document.getElementById("blockList");
+
+  var money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+
+  var state = { checkoutEnabled: false, ready: false };
+
+  Array.prototype.forEach.call(document.querySelectorAll(".year"), function (node) {
+    node.textContent = new Date().getFullYear();
+  });
+
+  document.getElementById("menuToggle").addEventListener("click", function () {
+    document.getElementById("navLinks").classList.toggle("open");
+  });
+
+  function escapeHtml(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
+    });
+  }
+
+  function message(kind, html) {
+    if (!kind) {
+      msgEl.className = "buy-msg";
+      msgEl.innerHTML = "";
+      return;
+    }
+    msgEl.className = "buy-msg show " + kind;
+    msgEl.innerHTML = html;
+  }
+
+  function showPrice(product) {
+    priceEl.classList.remove("loading");
+    priceEl.textContent = money.format(product.unitAmount / 100);
+    if (product.format) priceSub.textContent = product.format + ". No subscription.";
+  }
+
+  // Blocks are ordinary catalog products carrying `unlocksIn: "<this app>"`, so
+  // they appear here the moment one is published and priced — no HTML to edit,
+  // and no second list to keep in step with the store.
+  function renderBlocks(products) {
+    var blocks = products.filter(function (product) { return product.unlocksIn === APP_ID; });
+    if (blocks.length === 0) return;
+
+    blockList.className = "block-grid";
+    blockList.innerHTML = blocks
+      .map(function (block) {
+        return (
+          '<article class="block-card">' +
+            "<h3>" + escapeHtml(block.name) + "</h3>" +
+            "<p>" + escapeHtml(block.description || "") + "</p>" +
+            '<p class="block-price">' + money.format(block.unitAmount / 100) + "</p>" +
+          "</article>"
+        );
+      })
+      .join("");
+  }
+
+  buyBtn.addEventListener("click", async function () {
+    if (!state.ready) return;
+
+    if (!state.checkoutEnabled) {
+      message(
+        "warn",
+        "<strong>Card checkout is not switched on yet.</strong> Email " +
+          '<a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a> and we will ' +
+          "send you a payment link for the app."
+      );
+      return;
+    }
+
+    buyBtn.disabled = true;
+    buyBtn.textContent = "Starting checkout…";
+    message(null);
+
+    try {
+      var response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Ids only. The server prices the order from the catalog, so nothing
+        // this page sends can change what the customer is charged.
+        body: JSON.stringify({ items: [{ id: APP_ID }], cancelTo: "app" })
+      });
+      var payload = await response.json();
+
+      if (!response.ok || !payload.url) {
+        throw new Error(payload.message || "Checkout could not be started.");
+      }
+
+      window.location.href = payload.url;
+      return;
+    } catch (error) {
+      message(
+        "error",
+        escapeHtml(error.message) + " If this keeps happening, email " +
+          '<a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a>.'
+      );
+      buyBtn.disabled = false;
+      buyBtn.textContent = "Buy the App";
+    }
+  });
+
+  (async function init() {
+    if (new URLSearchParams(window.location.search).get("checkout") === "cancelled") {
+      message("warn", "Checkout was cancelled — nothing was charged.");
+    }
+
+    try {
+      var response = await fetch("/api/catalog");
+      if (!response.ok) throw new Error("Catalog request failed with status " + response.status);
+      var data = await response.json();
+
+      var products = data.products || [];
+      var app = products.filter(function (product) { return product.id === APP_ID; })[0];
+
+      state.checkoutEnabled = Boolean(data.checkoutEnabled);
+
+      if (!app) {
+        // Withdrawn from sale rather than broken: say so plainly instead of
+        // leaving a button that would fail at the Stripe step.
+        priceEl.classList.remove("loading");
+        priceEl.textContent = "—";
+        buyBtn.disabled = true;
+        buyBtn.textContent = "Currently unavailable";
+        message(
+          "warn",
+          "The app is not on sale just now. Email " +
+            '<a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a> and we will let you know when it is back.'
+        );
+        return;
+      }
+
+      showPrice(app);
+      renderBlocks(products);
+      state.ready = true;
+
+      if (!state.checkoutEnabled) {
+        message(
+          "warn",
+          "<strong>Card checkout is not switched on yet.</strong> The app is ready — email " +
+            '<a href="mailto:admin@anesthesiastudyco.com">admin@anesthesiastudyco.com</a> and we will send you a payment link.'
+        );
+      }
+    } catch (error) {
+      // The price is the one thing that must not be guessed, so the fallback is
+      // the last published figure with the button still live: checkout prices
+      // server-side regardless, so the customer is charged correctly either way.
+      priceEl.classList.remove("loading");
+      priceEl.textContent = priceEl.getAttribute("data-fallback");
+      state.ready = true;
+      state.checkoutEnabled = true;
+    }
+  })();
+</script>
+
+</body>
+</html>

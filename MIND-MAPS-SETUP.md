@@ -43,6 +43,38 @@ you upload under that exact name.
 > change them on its own. There is now a page that does it for you — see
 > [Step 4b](#step-4b--blur-the-photos-on-etsy-and-shopify-automatically).
 
+### The fastest way — all 89 maps in one command
+
+Your artwork is already in the website's own files, so nothing has to be gathered
+up first. On your own computer, in the website folder:
+
+```bash
+npm install
+export NETLIFY_SITE_ID=...      # copy from Netlify → Site configuration
+export NETLIFY_AUTH_TOKEN=...   # Netlify → User settings → Applications → New access token
+
+npm run downloads:upload
+```
+
+That first run **uploads nothing**. It prints what it would do: how many maps are
+ready to go, how many are already stored, and the exact file names of any other
+products (study guides, cram sheets, bundles) it could not find. When the list
+looks right:
+
+```bash
+npm run downloads:upload -- --confirm
+```
+
+For the products that are not mind maps, make a folder called `product-files` in
+the website folder and put the PDFs in it under exactly the names the first run
+printed, then run it again.
+
+Two things to know. Run this **on your own computer**, never on Netlify — on
+Netlify the artwork has already been swapped for the blurred previews, and
+uploading from there would send buyers the blurred copy. The script checks for
+this and stops rather than let it happen. And to replace a file already uploaded,
+add `--force`; without it, anything already stored is left alone.
+
 ### Doing it from the Netlify website
 
 1. Go to **https://app.netlify.com**, click your site.
@@ -53,7 +85,7 @@ you upload under that exact name.
    exactly — for example `mind-map-02.png`.
 5. Repeat for each map you want to sell.
 
-### Doing it by command (faster for many files)
+### Doing it by command, one at a time
 
 On your own computer, in the folder with your artwork:
 

@@ -34,7 +34,22 @@ export const CATEGORY_ALIASES: Record<string, string> = {
 
 export type Delivery =
   /** A file held in the `digital-products` Netlify Blobs store. */
-  | { kind: "file"; blobKey: string; filename: string; contentType: string }
+  | {
+      kind: "file";
+      blobKey: string;
+      filename: string;
+      contentType: string;
+      /**
+       * Serve it inline so the browser opens it, instead of saving it to disk.
+       *
+       * Set on the interactive apps, which are self-contained HTML: an app that
+       * arrives as a file in the Downloads folder is a worse product than one
+       * that opens when the buyer taps the button, and on a phone it is often
+       * one that cannot be opened at all. Only ever set on first-party files
+       * this repo publishes — anything served inline runs on our own origin.
+       */
+      openInBrowser?: true;
+    }
   /** An externally hosted download or app-access URL. */
   | { kind: "link"; url: string };
 
@@ -97,7 +112,44 @@ export type Product = {
    * existed does.
    */
   etsySku?: string;
+  /**
+   * For a block that unlocks inside another product rather than standing on its
+   * own: the id of the product it belongs to.
+   *
+   * The interactive workbook is one $29.99 purchase with further blocks that
+   * open inside it. A block is an ordinary catalog product — same checkout, same
+   * entitlement check, same signed link — and this field is what says which app
+   * it belongs to, so `app.html` can list an app's blocks without a second list
+   * being maintained anywhere.
+   *
+   * Until a block's price is decided it stays `published: false` with
+   * `unitAmount: 0`, which `sellable()` refuses to send to Stripe.
+   */
+  unlocksIn?: string;
 };
+
+/**
+ * The smallest charge Stripe accepts in USD, in cents.
+ *
+ * It doubles as the line between a priced product and a placeholder: a block
+ * that has been written down but not yet priced carries `unitAmount: 0`, and
+ * anything below this threshold must never reach a Checkout session.
+ */
+export const MINIMUM_CHARGE = 50;
+
+/**
+ * Whether a product can actually be charged for.
+ *
+ * Checked in `/api/checkout` rather than assumed, because the alternative
+ * failure is ugly and public: Stripe rejects a sub-$0.50 line item with an API
+ * error, so a customer who clicked buy on a not-yet-priced block would get
+ * "checkout failed" with nothing to act on. Refusing it here means the id is
+ * simply reported as unavailable, which is the truth.
+ */
+export function sellable(product: Product): boolean {
+  return product.unitAmount >= MINIMUM_CHARGE;
+}
+
 
 /**
  * The storefront sections, in the order they render.
@@ -527,26 +579,48 @@ export const PRODUCTS: Product[] = [
   },
 
   // ------------------------------------------------- interactive resources
+  //
+  // The workbook is the flagship: it has its own page (`app.html`), its own
+  // button on the landing page, and further blocks that open inside it once it
+  // is owned. Add a block as an ordinary product here with
+  // `unlocksIn: "app-planning-workbook"` and `categoryId: "interactive-resources"`,
+  // and both the app page and the storefront pick it up with no HTML to edit:
+  //
+  //   {
+  //     id: "app-block-regional",              // append-only, never renamed
+  //     name: "Regional Anesthesia Block",
+  //     categoryId: "interactive-resources",
+  //     unlocksIn: "app-planning-workbook",
+  //     published: false,                      // true once the price is set
+  //     unitAmount: 0,                         // in cents; 0 = not priced yet
+  //     ...
+  //   }
+  //
+  // Leave it `published: false` with `unitAmount: 0` until a price is chosen —
+  // `sellable()` refuses to send an unpriced record to Stripe, so a placeholder
+  // sitting here cannot turn into a broken checkout.
   {
     id: "app-planning-workbook",
     name: "Interactive Anesthesia Planning Workbook",
     categoryId: "interactive-resources",
     published: true,
-    unitAmount: 3800,
+    unitAmount: 2999,
     currency: "usd",
     description:
-      "The full planning workbook as a self-contained interactive file: structured prompts for preoperative review, induction, maintenance, emergence, and crisis planning, with your entries saved in the browser.",
-    format: "Interactive HTML app — runs offline, no install",
+      "The full planning workbook as a self-contained interactive app: structured prompts for preoperative review, induction, maintenance, emergence, and crisis planning, with your entries saved in the browser. One purchase, yours to keep — further blocks open inside it. © Anesthesia Study Co. LLC.",
+    format: "Interactive app — opens in any browser, works offline, no install",
     highlights: [
       "Guided case-planning prompts per phase",
       "Entries persist locally between sessions",
       "Print or export a finished plan",
+      "One-time purchase — no subscription",
     ],
     delivery: {
       kind: "file",
       blobKey: "app-planning-workbook.html",
       filename: "Interactive-Anesthesia-Planning-Workbook.html",
       contentType: "text/html",
+      openInBrowser: true,
     },
     featured: true,
   },
@@ -559,13 +633,14 @@ export const PRODUCTS: Product[] = [
     currency: "usd",
     description:
       "Branching case scenarios where each decision changes what happens next, followed by a debrief explaining why.",
-    format: "Interactive HTML app — runs offline, no install",
+    format: "Interactive app — opens in any browser, works offline, no install",
     highlights: ["Branching decision scenarios", "Consequence-driven progression", "Written debrief per case"],
     delivery: {
       kind: "file",
       blobKey: "app-case-simulations.html",
       filename: "Interactive-Case-Simulation-Pack.html",
       contentType: "text/html",
+      openInBrowser: true,
     },
   },
   {
@@ -577,13 +652,14 @@ export const PRODUCTS: Product[] = [
     currency: "usd",
     description:
       "A study tool for practising weight-based dosing and infusion calculations, with the working shown step by step so you can check your reasoning.",
-    format: "Interactive HTML app — runs offline, no install",
+    format: "Interactive app — opens in any browser, works offline, no install",
     highlights: ["Step-by-step worked solutions", "Weight-based and infusion practice", "Randomised practice sets"],
     delivery: {
       kind: "file",
       blobKey: "app-dosing-calculator.html",
       filename: "Interactive-Dosing-Practice-Calculator.html",
       contentType: "text/html",
+      openInBrowser: true,
     },
   },
 
@@ -660,12 +736,39 @@ export function getProduct(id: string): Product | undefined {
   );
 }
 
+/**
+ * The folder every public product picture has to come from.
+ *
+ * Files under it are generated by `scripts/build-previews.mjs`, which burns the
+ * downscale, the blur, and the watermark into the pixels. Anything else — the
+ * source artwork in `assets/mind-maps/`, a marketplace CDN URL, the full-size
+ * file a buyer paid for — is a sharp copy of the product, and putting one on a
+ * storefront card or a Stripe checkout page gives it away for free.
+ */
+const PREVIEW_PREFIX = "/assets/previews/";
+
+/**
+ * A product's picture, or nothing, and never anything sharp.
+ *
+ * Checked here rather than trusted from the record, because `previewImage` is
+ * hand-written in two files and the failure it guards against is silent: a card
+ * pointed at the wrong folder still renders, it just renders the artwork. Both
+ * the storefront and the Stripe line item read through this, so a mistyped path
+ * costs a missing thumbnail instead of a leaked product.
+ */
+export function safePreviewImage(product: Product): string | undefined {
+  return product.previewImage?.startsWith(PREVIEW_PREFIX) ? product.previewImage : undefined;
+}
+
 /** The catalog shape sent to the browser — delivery details stay server-side. */
 export function publicCatalog() {
   return {
     currency: "usd",
     categories: CATEGORIES,
     categoryAliases: CATEGORY_ALIASES,
-    products: PRODUCTS.filter((product) => product.published).map(({ delivery, ...rest }) => rest),
+    products: PRODUCTS.filter((product) => product.published).map(({ delivery, ...rest }) => ({
+      ...rest,
+      previewImage: safePreviewImage(rest as Product),
+    })),
   };
 }

@@ -7,6 +7,7 @@ A marketing website and digital storefront for **Anesthesia Study Co. LLC**, an 
 - **index.html** — Landing page with hero, purchase buttons, app overview, marketplace links, social, about, and support sections
 - **store.html** — Digital store: pick mind maps, study guides, cram sheets and quick references, bundles, or interactive resources and pay by card
 - **mind-maps.html** — The individual mind map collection: browse previews, buy one for $2.00 or any five for $9.00, and pay by card on site
+- **app.html** — Product page for the Interactive Anesthesia Planning Workbook: what it does, the licence, and a $29.99 one-time card purchase
 - **thank-you.html** — Post-payment page that unlocks every purchased file immediately
 - **privacy.html** — Privacy policy page (required for the Apple App Store support URL)
 - **netlify/functions/** — Catalog, mind maps, channel export, checkout, order-fulfilment, and file-download endpoints
@@ -57,23 +58,42 @@ still missing from the blob store. It never renders a key or any part of one.
 
 ### 2. Upload the product files
 
-Each catalog entry names a `blobKey`. Upload the matching file to the `digital-products` blob store:
+Each catalog entry names a `blobKey`, and `/api/download` serves whatever is stored in the
+`digital-products` blob store under that key. Until a file is uploaded, a customer who buys it still
+completes payment and is shown a clear message asking them to email support — the purchase is never
+silently lost, but it is also not instant, which is the whole point of a digital product.
+
+`scripts/upload-downloads.mjs` stocks the store in one command. It is a dry run unless `--confirm`
+is passed, because what it writes is live for real customers the moment it lands:
+
+```bash
+export NETLIFY_SITE_ID=...      # netlify status
+export NETLIFY_AUTH_TOKEN=...   # Netlify → User settings → Applications
+
+npm run downloads:upload                        # report what is missing, upload nothing
+npm run downloads:upload -- --confirm           # upload it
+npm run downloads:upload -- --only map-05       # one product
+npm run downloads:upload -- --confirm --force   # replace keys already in the store
+```
+
+It looks for each product's file in one of two places:
+
+| Products | Source | Notes |
+| --- | --- | --- |
+| The 89 individual mind maps | `assets/mind-maps/<blobKey>` | Already in the repository — nothing to stage |
+| Everything else | `product-files/<blobKey>` | Git-ignored; drop the PDFs, HTML, and ZIPs in under exactly the names the dry run prints |
+
+Run it **from a clean checkout, never from a Netlify build**. `previews:deploy` overwrites the
+artwork folder in place with watermarked previews, so uploading from a build machine would sell
+buyers the preview; the script refuses to run when `NETLIFY=true` or when git shows the artwork
+modified, for exactly that reason.
+
+Single files can still go up by hand, and `netlify blobs:list digital-products` verifies either way:
 
 ```bash
 netlify blobs:set digital-products guide-pharmacology.pdf --input ./files/pharmacology.pdf
-netlify blobs:set digital-products onepager-induction.pdf --input ./files/induction.pdf
-netlify blobs:set digital-products mindmap-airway.pdf --input ./files/airway-map.pdf
-netlify blobs:set digital-products app-planning-workbook.html --input ./files/workbook.html
-# ...one per product
-
-# Individual mind maps use their preview file name as the key
-netlify blobs:set digital-products mind-map-02.png --input ./files/phenylephrine-full.png
-
-netlify blobs:list digital-products     # verify
+netlify blobs:list digital-products
 ```
-
-Until a file is uploaded, a customer who buys it still completes payment and is shown a clear
-message asking them to email support — the purchase is never silently lost.
 
 ### 3. Check the Stripe dashboard settings
 
@@ -104,6 +124,40 @@ chose. `published: false` keeps a record in the catalog but off the storefront, 
 product is staged before its file exists. To add a category: append to `CATEGORIES` and use its `id`
 as the `categoryId` on products. Landing page buttons can deep-link to any category, e.g.
 `store.html#cram-sheets`; a renamed category keeps its old anchor alive through `CATEGORY_ALIASES`.
+
+### The interactive app and its in-app blocks
+
+The Interactive Anesthesia Planning Workbook is one $29.99 purchase with its own product page,
+`app.html`, which the landing page's "Get the Interactive Workbook" button opens. The page reads the
+name and price from `/api/catalog` and buys the product straight through `/api/checkout` — nothing
+about it is typed into the HTML except a fallback figure.
+
+Because the apps are self-contained HTML, their delivery records carry `openInBrowser: true`.
+`/api/download` then serves them inline, so the buyer's button opens the app instead of dropping a
+file in a Downloads folder — which on a phone is often unopenable. PDFs and ZIPs still download.
+
+Blocks that unlock inside the app are ordinary catalog products with one extra field:
+
+```ts
+{
+  id: "app-block-regional",                  // append-only; never rename an id
+  name: "Regional Anesthesia Block",
+  categoryId: "interactive-resources",
+  unlocksIn: "app-planning-workbook",        // which app it belongs to
+  published: false,                          // flip to true once priced
+  unitAmount: 0,                             // cents; 0 means "not priced yet"
+  ...
+}
+```
+
+They use the same checkout, the same Stripe entitlement check, and the same signed links as
+everything else, so there is no separate purchase path to maintain. `app.html` lists an app's blocks
+by filtering the catalog on `unlocksIn`, which means adding one is a single edit to `catalog.ts`
+with no HTML to touch; until any exist, the page shows a "pricing is being set" panel.
+
+Leave a block at `unitAmount: 0` until its price is decided. `sellable()` refuses to send anything
+under $0.50 to Stripe — the API rejects such a line item, and a customer clicking buy would get an
+unexplained "checkout failed" — so an unpriced placeholder sitting in the catalog is safe.
 
 ### Reconciling the three catalogs
 
@@ -196,3 +250,24 @@ does not already hold a clean copy of the artwork it would overwrite. Blur stren
 and how much of the map the listing crop shows are set with `PREVIEW_BLUR_SIGMA`,
 `PREVIEW_MAX_EDGE`, `PREVIEW_LISTING_SIZE`, and `PREVIEW_LISTING_ZOOM` (a fraction of the short
 edge; `1` takes the largest square that fits, `0.6` shows considerably less).
+
+## The Build's Link Check
+
+The deploy runs `npm run links:check` before anything else, and a failure stops it while the
+previous deploy keeps serving.
+
+```bash
+npm run links:check
+```
+
+It exists because the landing page once shipped with its "Browse Mind Maps" and Amazon buttons
+pointing at sections an edit had deleted. The HTML was still valid and the deploy was still green;
+the buttons simply did nothing. So `scripts/check-links.mjs` asserts the three things that would
+have caught it: every same-page `#anchor` has an element with that id, every local file a page links
+to or loads an image from is on disk, and no page ends early or carries a placeholder comment where
+content should be.
+
+A hash on *another* page is checked only as far as the file. `store.html#study-guides` has no
+matching id in the file on disk and never will — those sections are built from `/api/catalog` after
+load, which is also why `mind-maps.html` resolves its own `#map-05` deep links in JavaScript once
+the grid exists.
